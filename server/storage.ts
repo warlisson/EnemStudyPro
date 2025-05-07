@@ -11,7 +11,20 @@ import {
   videoComments, type VideoComment, type InsertVideoComment,
   categories, type Category, type InsertCategory,
   videoCategoryRelations, type VideoCategoryRelation, type InsertVideoCategoryRelation,
-  videoExercises, type VideoExercise, type InsertVideoExercise
+  videoExercises, type VideoExercise, type InsertVideoExercise,
+  // Novos tipos para Flash Cards
+  flashCards, type FlashCard, type InsertFlashCard,
+  flashCardDecks, type FlashCardDeck, type InsertFlashCardDeck,
+  deckCards, type DeckCard, type InsertDeckCard,
+  // Novos tipos para Exames
+  exams, type Exam, type InsertExam,
+  examQuestions, type ExamQuestion, type InsertExamQuestion,
+  examAttempts, type ExamAttempt, type InsertExamAttempt,
+  // Novos tipos para Fóruns
+  forums, type Forum, type InsertForum,
+  forumThreads, type ForumThread, type InsertForumThread,
+  forumPosts, type ForumPost, type InsertForumPost,
+  type Json
 } from "@shared/schema";
 
 // Storage interface
@@ -83,6 +96,74 @@ export interface IStorage {
   // Video Exercises
   getVideoExercises(videoId: number): Promise<Question[]>;
   addVideoExercise(videoExercise: InsertVideoExercise): Promise<VideoExercise>;
+  
+  // Flash Cards
+  getAllFlashCards(userId: number): Promise<FlashCard[]>;
+  getFlashCardsBySubject(userId: number, subject: string): Promise<FlashCard[]>;
+  getFlashCardById(id: number): Promise<FlashCard | undefined>;
+  createFlashCard(flashCard: InsertFlashCard): Promise<FlashCard>;
+  updateFlashCard(id: number, data: Partial<InsertFlashCard>): Promise<FlashCard>;
+  deleteFlashCard(id: number): Promise<boolean>;
+  getDueFlashCards(userId: number, limit?: number): Promise<FlashCard[]>;
+  updateFlashCardReviewStatus(id: number, difficulty: number): Promise<FlashCard>;
+  
+  // Flash Card Decks
+  getAllFlashCardDecks(userId: number): Promise<FlashCardDeck[]>;
+  getFlashCardDeckById(id: number): Promise<FlashCardDeck | undefined>;
+  createFlashCardDeck(deck: InsertFlashCardDeck): Promise<FlashCardDeck>;
+  updateFlashCardDeck(id: number, data: Partial<InsertFlashCardDeck>): Promise<FlashCardDeck>;
+  deleteFlashCardDeck(id: number): Promise<boolean>;
+  getFlashCardDecksBySubject(userId: number, subject: string): Promise<FlashCardDeck[]>;
+  getPublicFlashCardDecks(): Promise<FlashCardDeck[]>;
+  
+  // Deck Cards (Relacionamento entre deck e cards)
+  addFlashCardToDeck(deckId: number, cardId: number, order?: number): Promise<DeckCard>;
+  removeFlashCardFromDeck(deckId: number, cardId: number): Promise<boolean>;
+  getFlashCardsFromDeck(deckId: number): Promise<FlashCard[]>;
+  reorderFlashCardInDeck(deckId: number, cardId: number, newOrder: number): Promise<boolean>;
+  
+  // Exams
+  getAllExams(): Promise<Exam[]>;
+  getExamById(id: number): Promise<Exam | undefined>;
+  createExam(exam: InsertExam): Promise<Exam>;
+  updateExam(id: number, data: Partial<InsertExam>): Promise<Exam>;
+  deleteExam(id: number): Promise<boolean>;
+  getExamsBySubject(subject: string): Promise<Exam[]>;
+  getPublicExams(): Promise<Exam[]>;
+  
+  // Exam Questions
+  addQuestionToExam(examQuestion: InsertExamQuestion): Promise<ExamQuestion>;
+  removeQuestionFromExam(examId: number, questionId: number): Promise<boolean>;
+  getQuestionsFromExam(examId: number): Promise<Question[]>;
+  reorderQuestionInExam(examId: number, questionId: number, newOrder: number): Promise<boolean>;
+  
+  // Exam Attempts
+  createExamAttempt(attempt: InsertExamAttempt): Promise<ExamAttempt>;
+  updateExamAttempt(id: number, data: Partial<InsertExamAttempt>): Promise<ExamAttempt>;
+  getExamAttempt(id: number): Promise<ExamAttempt | undefined>;
+  getExamAttemptsByUser(userId: number): Promise<ExamAttempt[]>;
+  getExamAttemptsByExam(examId: number): Promise<ExamAttempt[]>;
+  getExamAttemptsByUserAndExam(userId: number, examId: number): Promise<ExamAttempt[]>;
+  
+  // Forums
+  getAllForums(): Promise<Forum[]>;
+  getForumById(id: number): Promise<Forum | undefined>;
+  createForum(forum: InsertForum): Promise<Forum>;
+  getForumsBySubject(subject: string): Promise<Forum[]>;
+  
+  // Forum Threads
+  getAllThreads(forumId: number): Promise<ForumThread[]>;
+  getThreadById(id: number): Promise<ForumThread | undefined>;
+  createThread(thread: InsertForumThread): Promise<ForumThread>;
+  updateThread(id: number, data: Partial<InsertForumThread>): Promise<ForumThread>;
+  getRecentThreads(limit?: number): Promise<ForumThread[]>;
+  
+  // Forum Posts
+  getPostsByThread(threadId: number): Promise<ForumPost[]>;
+  getPostById(id: number): Promise<ForumPost | undefined>;
+  createPost(post: InsertForumPost): Promise<ForumPost>;
+  updatePost(id: number, data: Partial<InsertForumPost>): Promise<ForumPost>;
+  getRecentPosts(limit?: number): Promise<ForumPost[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -100,6 +181,21 @@ export class MemStorage implements IStorage {
   private videoCategoryRelations: Map<number, VideoCategoryRelation>;
   private videoExercises: Map<number, VideoExercise>;
   
+  // Novos maps para Flash Cards
+  private flashCards: Map<number, FlashCard>;
+  private flashCardDecks: Map<number, FlashCardDeck>;
+  private deckCards: Map<number, DeckCard>;
+  
+  // Novos maps para Exams
+  private exams: Map<number, Exam>;
+  private examQuestions: Map<number, ExamQuestion>;
+  private examAttempts: Map<number, ExamAttempt>;
+  
+  // Novos maps para Forums
+  private forums: Map<number, Forum>;
+  private forumThreads: Map<number, ForumThread>;
+  private forumPosts: Map<number, ForumPost>;
+  
   private currentUserIds: number;
   private currentSubjectIds: number;
   private currentQuestionIds: number;
@@ -113,6 +209,17 @@ export class MemStorage implements IStorage {
   private currentCategoryIds: number;
   private currentVideoCategoryRelationIds: number;
   private currentVideoExerciseIds: number;
+  
+  // Novos IDs counters
+  private currentFlashCardIds: number = 1;
+  private currentFlashCardDeckIds: number = 1;
+  private currentDeckCardIds: number = 1;
+  private currentExamIds: number = 1;
+  private currentExamQuestionIds: number = 1;
+  private currentExamAttemptIds: number = 1;
+  private currentForumIds: number = 1;
+  private currentForumThreadIds: number = 1;
+  private currentForumPostIds: number = 1;
 
   constructor() {
     this.users = new Map();
@@ -128,6 +235,17 @@ export class MemStorage implements IStorage {
     this.categories = new Map();
     this.videoCategoryRelations = new Map();
     this.videoExercises = new Map();
+    
+    // Inicialização dos novos maps
+    this.flashCards = new Map();
+    this.flashCardDecks = new Map();
+    this.deckCards = new Map();
+    this.exams = new Map();
+    this.examQuestions = new Map();
+    this.examAttempts = new Map();
+    this.forums = new Map();
+    this.forumThreads = new Map();
+    this.forumPosts = new Map();
     
     this.currentUserIds = 1;
     this.currentSubjectIds = 1;

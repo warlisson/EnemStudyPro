@@ -2,6 +2,9 @@ import { pgTable, text, serial, integer, boolean, jsonb, timestamp, real } from 
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Type for JSON fields
+export type Json = Record<string, any>;
+
 // Users table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -263,6 +266,212 @@ export const insertVideoExerciseSchema = createInsertSchema(videoExercises).pick
   orderInVideo: true,
 });
 
+// Flash Cards table
+export const flashCards = pgTable("flash_cards", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  subject: text("subject").notNull(),
+  front: text("front").notNull(),
+  back: text("back").notNull(),
+  difficulty: integer("difficulty").default(3), // 1-5 (Muito fácil a Muito difícil)
+  nextReviewDate: timestamp("next_review_date").defaultNow(),
+  reviewCount: integer("review_count").default(0),
+  lastInterval: integer("last_interval").default(1), // em dias
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  tags: jsonb("tags").default([]),
+  imageUrl: text("image_url"),
+  customMetadata: jsonb("custom_metadata"),
+});
+
+export const insertFlashCardSchema = createInsertSchema(flashCards).pick({
+  userId: true,
+  subject: true,
+  front: true,
+  back: true,
+  difficulty: true,
+  nextReviewDate: true,
+  tags: true,
+  imageUrl: true,
+  customMetadata: true,
+});
+
+// Flash Card Decks table
+export const flashCardDecks = pgTable("flash_card_decks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  subject: text("subject"),
+  isPublic: boolean("is_public").default(false),
+  cardCount: integer("card_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  coverImage: text("cover_image"),
+  tags: jsonb("tags").default([]),
+});
+
+export const insertFlashCardDeckSchema = createInsertSchema(flashCardDecks).pick({
+  userId: true,
+  name: true,
+  description: true,
+  subject: true,
+  isPublic: true,
+  coverImage: true,
+  tags: true,
+});
+
+// Flash Card Deck Cards Relation table
+export const deckCards = pgTable("deck_cards", {
+  id: serial("id").primaryKey(),
+  deckId: integer("deck_id").notNull(),
+  cardId: integer("card_id").notNull(),
+  order: integer("order").default(0),
+});
+
+export const insertDeckCardSchema = createInsertSchema(deckCards).pick({
+  deckId: true,
+  cardId: true,
+  order: true,
+});
+
+// Exams table
+export const exams = pgTable("exams", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  duration: integer("duration").notNull(), // em minutos
+  questionCount: integer("question_count").default(0),
+  subjects: jsonb("subjects").default([]),
+  difficulty: integer("difficulty").default(2), // 1-5
+  isPublic: boolean("is_public").default(false),
+  createdBy: integer("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  instructions: text("instructions"),
+  passingScore: integer("passing_score"),
+});
+
+export const insertExamSchema = createInsertSchema(exams).pick({
+  title: true,
+  description: true,
+  duration: true,
+  subjects: true,
+  difficulty: true,
+  isPublic: true,
+  createdBy: true,
+  instructions: true,
+  passingScore: true,
+});
+
+// Exam Questions table
+export const examQuestions = pgTable("exam_questions", {
+  id: serial("id").primaryKey(),
+  examId: integer("exam_id").notNull(),
+  questionId: integer("question_id").notNull(),
+  order: integer("order").default(0),
+  points: integer("points").default(1),
+});
+
+export const insertExamQuestionSchema = createInsertSchema(examQuestions).pick({
+  examId: true,
+  questionId: true,
+  order: true,
+  points: true,
+});
+
+// Exam Attempts table
+export const examAttempts = pgTable("exam_attempts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  examId: integer("exam_id").notNull(),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  score: integer("score"),
+  timeSpent: integer("time_spent"), // em segundos
+  answers: jsonb("answers"), // Armazena as respostas do usuário
+  status: text("status").default("in_progress"), // in_progress, completed, abandoned
+});
+
+export const insertExamAttemptSchema = createInsertSchema(examAttempts).pick({
+  userId: true,
+  examId: true,
+  startedAt: true,
+  completedAt: true,
+  score: true,
+  timeSpent: true,
+  answers: true,
+  status: true,
+});
+
+// Forums table
+export const forums = pgTable("forums", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  subject: text("subject"), // Pode ser null para fóruns gerais
+  icon: text("icon"),
+  color: text("color"),
+  threadCount: integer("thread_count").default(0),
+  postCount: integer("post_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertForumSchema = createInsertSchema(forums).pick({
+  name: true,
+  description: true,
+  subject: true,
+  icon: true,
+  color: true,
+});
+
+// Forum Threads table
+export const forumThreads = pgTable("forum_threads", {
+  id: serial("id").primaryKey(),
+  forumId: integer("forum_id").notNull(),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  isPinned: boolean("is_pinned").default(false),
+  isLocked: boolean("is_locked").default(false),
+  viewCount: integer("view_count").default(0),
+  replyCount: integer("reply_count").default(0),
+  lastReplyAt: timestamp("last_reply_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  tags: jsonb("tags").default([]),
+});
+
+export const insertForumThreadSchema = createInsertSchema(forumThreads).pick({
+  forumId: true,
+  userId: true,
+  title: true,
+  content: true,
+  isPinned: true,
+  isLocked: true,
+  tags: true,
+});
+
+// Forum Posts table
+export const forumPosts = pgTable("forum_posts", {
+  id: serial("id").primaryKey(),
+  threadId: integer("thread_id").notNull(),
+  userId: integer("user_id").notNull(),
+  content: text("content").notNull(),
+  isAnswer: boolean("is_answer").default(false),
+  parentId: integer("parent_id"), // Para respostas a outros posts
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertForumPostSchema = createInsertSchema(forumPosts).pick({
+  threadId: true,
+  userId: true,
+  content: true,
+  isAnswer: true,
+  parentId: true,
+});
+
 // Define types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -302,3 +511,30 @@ export type VideoCategoryRelation = typeof videoCategoryRelations.$inferSelect;
 
 export type InsertVideoExercise = z.infer<typeof insertVideoExerciseSchema>;
 export type VideoExercise = typeof videoExercises.$inferSelect;
+
+export type InsertFlashCard = z.infer<typeof insertFlashCardSchema>;
+export type FlashCard = typeof flashCards.$inferSelect;
+
+export type InsertFlashCardDeck = z.infer<typeof insertFlashCardDeckSchema>;
+export type FlashCardDeck = typeof flashCardDecks.$inferSelect;
+
+export type InsertDeckCard = z.infer<typeof insertDeckCardSchema>;
+export type DeckCard = typeof deckCards.$inferSelect;
+
+export type InsertExam = z.infer<typeof insertExamSchema>;
+export type Exam = typeof exams.$inferSelect;
+
+export type InsertExamQuestion = z.infer<typeof insertExamQuestionSchema>;
+export type ExamQuestion = typeof examQuestions.$inferSelect;
+
+export type InsertExamAttempt = z.infer<typeof insertExamAttemptSchema>;
+export type ExamAttempt = typeof examAttempts.$inferSelect;
+
+export type InsertForum = z.infer<typeof insertForumSchema>;
+export type Forum = typeof forums.$inferSelect;
+
+export type InsertForumThread = z.infer<typeof insertForumThreadSchema>;
+export type ForumThread = typeof forumThreads.$inferSelect;
+
+export type InsertForumPost = z.infer<typeof insertForumPostSchema>;
+export type ForumPost = typeof forumPosts.$inferSelect;
