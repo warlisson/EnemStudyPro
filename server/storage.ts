@@ -235,6 +235,233 @@ export class MemStorage implements IStorage {
     ];
     
     newsData.forEach(newsItem => this.createNews(newsItem));
+    
+    // Add sample categories
+    const categoriesData: InsertCategory[] = [
+      {
+        name: "Revisão para o ENEM",
+        description: "Aulas de revisão com foco no ENEM",
+        icon: "graduationCap",
+        color: "#3b82f6",
+        subject: null
+      },
+      {
+        name: "Exercícios Resolvidos",
+        description: "Aulas com resolução passo a passo de exercícios",
+        icon: "pencil",
+        color: "#22c55e",
+        subject: null
+      },
+      {
+        name: "Gramática",
+        description: "Aulas sobre regras gramaticais e escrita",
+        icon: "book",
+        color: "#3b82f6",
+        subject: "portugues"
+      },
+      {
+        name: "Álgebra",
+        description: "Aulas sobre equações, funções e polinômios",
+        icon: "calculator",
+        color: "#22c55e",
+        subject: "matematica"
+      },
+      {
+        name: "Eletromagnetismo",
+        description: "Aulas sobre eletricidade e magnetismo",
+        icon: "atom",
+        color: "#eab308",
+        subject: "fisica"
+      }
+    ];
+    
+    const createdCategories = Promise.all(categoriesData.map(category => this.createCategory(category)));
+    
+    // Add sample video lessons
+    const videoLessonsData: InsertVideoLesson[] = [
+      {
+        title: "Equações do 2º Grau - Teoria e Fórmula de Bhaskara",
+        description: "Nesta aula, vamos aprender sobre equações do segundo grau: como identificá-las, o que significa cada termo e como aplicar a fórmula de Bhaskara para encontrar suas raízes.",
+        videoUrl: "https://www.youtube.com/watch?v=example1",
+        thumbnailUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
+        subject: "matematica",
+        professor: "Ricardo Oliveira",
+        duration: 1800, // 30 minutos
+        level: 1, // Básico
+        orderInSeries: 1,
+        seriesId: 1,
+        topics: ["álgebra", "equações", "bhaskara"],
+        attachments: [
+          { name: "Apostila de Equações", url: "https://example.com/apostila.pdf" },
+          { name: "Lista de Exercícios", url: "https://example.com/exercicios.pdf" }
+        ]
+      },
+      {
+        title: "Resolução de Equações do 2º Grau - Exercícios Comentados",
+        description: "Nesta aula, vamos resolver diversos exercícios de equações do segundo grau, desde os mais simples até problemas mais complexos que caem em vestibulares.",
+        videoUrl: "https://www.youtube.com/watch?v=example2",
+        thumbnailUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
+        subject: "matematica",
+        professor: "Ricardo Oliveira",
+        duration: 2400, // 40 minutos
+        level: 2, // Intermediário
+        orderInSeries: 2,
+        seriesId: 1,
+        topics: ["álgebra", "equações", "bhaskara", "problemas"],
+        attachments: [
+          { name: "Lista de Exercícios Resolvidos", url: "https://example.com/exercicios-resolvidos.pdf" }
+        ]
+      },
+      {
+        title: "Análise Sintática - Sujeito e Predicado",
+        description: "Nesta aula, vamos aprender sobre a estrutura básica das orações em português, identificando os diferentes tipos de sujeito e predicado.",
+        videoUrl: "https://www.youtube.com/watch?v=example3",
+        thumbnailUrl: "https://images.unsplash.com/photo-1455894127589-22f75500213a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
+        subject: "portugues",
+        professor: "Ana Paula Silva",
+        duration: 1500, // 25 minutos
+        level: 1, // Básico
+        orderInSeries: 1,
+        seriesId: 2,
+        topics: ["gramática", "análise sintática", "sujeito", "predicado"],
+        attachments: [
+          { name: "Resumo de Análise Sintática", url: "https://example.com/resumo.pdf" }
+        ]
+      },
+      {
+        title: "Leis de Newton - Força e Movimento",
+        description: "Nesta aula, vamos estudar as três leis de Newton que fundamentam a mecânica clássica, com exemplos práticos e aplicações.",
+        videoUrl: "https://www.youtube.com/watch?v=example4",
+        thumbnailUrl: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
+        subject: "fisica",
+        professor: "Carlos Mendes",
+        duration: 2700, // 45 minutos
+        level: 2, // Intermediário
+        orderInSeries: null,
+        seriesId: null,
+        topics: ["mecânica", "leis de newton", "força", "movimento"],
+        attachments: [
+          { name: "Formulário de Mecânica", url: "https://example.com/formulario.pdf" },
+          { name: "Simulações Interativas", url: "https://example.com/simulacoes.html" }
+        ]
+      },
+      {
+        title: "Genética Mendeliana - Primeira e Segunda Lei de Mendel",
+        description: "Nesta aula, vamos entender os princípios da hereditariedade descobertos por Gregor Mendel, estudando a lei da segregação e a lei da segregação independente.",
+        videoUrl: "https://www.youtube.com/watch?v=example5",
+        thumbnailUrl: "https://images.unsplash.com/photo-1530210124550-912dc1381cb8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
+        subject: "biologia",
+        professor: "Marina Costa",
+        duration: 3000, // 50 minutos
+        level: 3, // Avançado
+        orderInSeries: null,
+        seriesId: null,
+        topics: ["genética", "mendel", "hereditariedade", "alelos"],
+        attachments: [
+          { name: "Quadro de Cruzamentos", url: "https://example.com/cruzamentos.pdf" }
+        ]
+      }
+    ];
+    
+    videoLessonsData.forEach(async (videoLesson) => {
+      const video = await this.createVideoLesson(videoLesson);
+      
+      // Associar vídeos às categorias
+      if (video.subject === "matematica") {
+        const algebraCategory = await this.getCategoriesBySubject("matematica").then(cats => cats[0]);
+        if (algebraCategory) {
+          await this.addVideoCategoryRelation({
+            videoId: video.id,
+            categoryId: algebraCategory.id
+          });
+        }
+        
+        if (video.title.includes("Exercícios")) {
+          const exercisesCategory = (await this.getAllCategories())[1]; // "Exercícios Resolvidos"
+          if (exercisesCategory) {
+            await this.addVideoCategoryRelation({
+              videoId: video.id,
+              categoryId: exercisesCategory.id
+            });
+          }
+        }
+      } else if (video.subject === "portugues") {
+        const grammarCategory = await this.getCategoriesBySubject("portugues").then(cats => cats[0]);
+        if (grammarCategory) {
+          await this.addVideoCategoryRelation({
+            videoId: video.id,
+            categoryId: grammarCategory.id
+          });
+        }
+      } else if (video.subject === "fisica") {
+        const physicsCategory = await this.getCategoriesBySubject("fisica").then(cats => cats[0]);
+        if (physicsCategory) {
+          await this.addVideoCategoryRelation({
+            videoId: video.id,
+            categoryId: physicsCategory.id
+          });
+        }
+      }
+      
+      // Adicionar à categoria de revisão ENEM para todos os vídeos
+      const enemCategory = (await this.getAllCategories())[0]; // "Revisão para o ENEM"
+      if (enemCategory) {
+        await this.addVideoCategoryRelation({
+          videoId: video.id,
+          categoryId: enemCategory.id
+        });
+      }
+    });
+    
+    // Adicionar alguns comentários de exemplo
+    setTimeout(async () => {
+      const videos = await this.getAllVideoLessons();
+      if (videos.length > 0) {
+        const firstVideo = videos[0];
+        
+        this.addVideoComment({
+          userId: 1,
+          videoId: firstVideo.id,
+          content: "Ótima explicação! Muito mais fácil de entender do que no meu colégio.",
+          parentId: null,
+          isQuestion: false,
+          isProfessorResponse: false
+        });
+        
+        this.addVideoComment({
+          userId: 1,
+          videoId: firstVideo.id,
+          content: "Tenho uma dúvida: o delta pode ser negativo? E se for, o que significa?",
+          parentId: null,
+          isQuestion: true,
+          isProfessorResponse: false
+        }).then(comment => {
+          this.addVideoComment({
+            userId: 1,
+            videoId: firstVideo.id,
+            content: "Ótima pergunta! Quando o delta é negativo, a equação não possui raízes reais, apenas raízes complexas. Isso significa que a parábola que representa a equação não cruza o eixo x em nenhum ponto.",
+            parentId: comment.id,
+            isQuestion: false,
+            isProfessorResponse: true
+          });
+        });
+        
+        // Adicionar algumas avaliações
+        this.addVideoRating({
+          userId: 1,
+          videoId: firstVideo.id,
+          rating: 5,
+          comment: "Excelente aula! O professor explica de forma clara e didática."
+        });
+        
+        this.addVideoRating({
+          userId: 2,
+          videoId: firstVideo.id,
+          rating: 4,
+          comment: "Muito boa, mas poderia ter mais exemplos."
+        });
+      }
+    }, 500); // Pequeno delay para garantir que os vídeos já foram criados
   }
 
   // User methods
@@ -666,6 +893,14 @@ export class MemStorage implements IStorage {
     const videoExercise: VideoExercise = { ...exercise, id };
     this.videoExercises.set(id, videoExercise);
     return videoExercise;
+  }
+  
+  // Category-Video relation methods
+  async addVideoCategoryRelation(relation: InsertVideoCategoryRelation): Promise<VideoCategoryRelation> {
+    const id = this.currentVideoCategoryRelationIds++;
+    const videoCategoryRelation: VideoCategoryRelation = { ...relation, id };
+    this.videoCategoryRelations.set(id, videoCategoryRelation);
+    return videoCategoryRelation;
   }
 }
 
