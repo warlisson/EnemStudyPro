@@ -1020,6 +1020,729 @@ export class MemStorage implements IStorage {
     this.videoCategoryRelations.set(id, videoCategoryRelation);
     return videoCategoryRelation;
   }
+
+  // ===========================================
+  // Flash Cards Implementation
+  // ===========================================
+  
+  async getAllFlashCards(userId: number): Promise<FlashCard[]> {
+    const cards = Array.from(this.flashCards.values());
+    return cards.filter(card => card.userId === userId);
+  }
+  
+  async getFlashCardsBySubject(userId: number, subject: string): Promise<FlashCard[]> {
+    const cards = Array.from(this.flashCards.values());
+    return cards.filter(card => card.userId === userId && card.subject === subject);
+  }
+  
+  async getFlashCardById(id: number): Promise<FlashCard | undefined> {
+    return this.flashCards.get(id);
+  }
+  
+  async createFlashCard(flashCard: InsertFlashCard): Promise<FlashCard> {
+    const id = this.currentFlashCardIds++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    
+    const newFlashCard: FlashCard = {
+      ...flashCard,
+      id,
+      createdAt,
+      updatedAt,
+      reviewCount: 0,
+      lastInterval: 1
+    };
+    
+    this.flashCards.set(id, newFlashCard);
+    return newFlashCard;
+  }
+  
+  async updateFlashCard(id: number, data: Partial<InsertFlashCard>): Promise<FlashCard> {
+    const flashCard = await this.getFlashCardById(id);
+    if (!flashCard) throw new Error(`Flash card with id ${id} not found`);
+    
+    const updatedFlashCard: FlashCard = {
+      ...flashCard,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.flashCards.set(id, updatedFlashCard);
+    return updatedFlashCard;
+  }
+  
+  async deleteFlashCard(id: number): Promise<boolean> {
+    const exists = this.flashCards.has(id);
+    if (!exists) return false;
+    
+    this.flashCards.delete(id);
+    
+    // Também remover qualquer relacionamento com decks
+    for (const [deckCardId, deckCard] of this.deckCards.entries()) {
+      if (deckCard.cardId === id) {
+        this.deckCards.delete(deckCardId);
+      }
+    }
+    
+    return true;
+  }
+  
+  async getDueFlashCards(userId: number, limit?: number): Promise<FlashCard[]> {
+    const now = new Date();
+    const cards = Array.from(this.flashCards.values())
+      .filter(card => card.userId === userId && card.nextReviewDate <= now)
+      .sort((a, b) => a.nextReviewDate.getTime() - b.nextReviewDate.getTime());
+    
+    return limit ? cards.slice(0, limit) : cards;
+  }
+  
+  async updateFlashCardReviewStatus(id: number, difficulty: number): Promise<FlashCard> {
+    const flashCard = await this.getFlashCardById(id);
+    if (!flashCard) throw new Error(`Flash card with id ${id} not found`);
+    
+    // Algoritmo de repetição espaçada simples
+    // Aumenta o intervalo com base na dificuldade relatada pelo usuário
+    let newInterval = flashCard.lastInterval;
+    
+    // Dificuldade varia de 1 (muito difícil) a 5 (muito fácil)
+    if (difficulty <= 2) {
+      // Difícil - intervalos menores
+      newInterval = Math.max(1, Math.floor(newInterval * 1.5));
+    } else if (difficulty === 3) {
+      // Normal - dobrar o intervalo
+      newInterval = newInterval * 2;
+    } else {
+      // Fácil - intervalos maiores
+      newInterval = newInterval * 2.5;
+    }
+    
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + newInterval);
+    
+    const updatedFlashCard: FlashCard = {
+      ...flashCard,
+      reviewCount: flashCard.reviewCount + 1,
+      lastInterval: newInterval,
+      nextReviewDate: nextDate,
+      updatedAt: new Date()
+    };
+    
+    this.flashCards.set(id, updatedFlashCard);
+    return updatedFlashCard;
+  }
+  
+  // Flash Card Decks
+  async getAllFlashCardDecks(userId: number): Promise<FlashCardDeck[]> {
+    const decks = Array.from(this.flashCardDecks.values());
+    return decks.filter(deck => deck.userId === userId || deck.isPublic);
+  }
+  
+  async getFlashCardDeckById(id: number): Promise<FlashCardDeck | undefined> {
+    return this.flashCardDecks.get(id);
+  }
+  
+  async createFlashCardDeck(deck: InsertFlashCardDeck): Promise<FlashCardDeck> {
+    const id = this.currentFlashCardDeckIds++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    
+    const newDeck: FlashCardDeck = {
+      ...deck,
+      id,
+      createdAt,
+      updatedAt,
+      cardCount: 0
+    };
+    
+    this.flashCardDecks.set(id, newDeck);
+    return newDeck;
+  }
+  
+  async updateFlashCardDeck(id: number, data: Partial<InsertFlashCardDeck>): Promise<FlashCardDeck> {
+    const deck = await this.getFlashCardDeckById(id);
+    if (!deck) throw new Error(`Deck with id ${id} not found`);
+    
+    const updatedDeck: FlashCardDeck = {
+      ...deck,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.flashCardDecks.set(id, updatedDeck);
+    return updatedDeck;
+  }
+  
+  async deleteFlashCardDeck(id: number): Promise<boolean> {
+    const exists = this.flashCardDecks.has(id);
+    if (!exists) return false;
+    
+    this.flashCardDecks.delete(id);
+    
+    // Remover todos os relacionamentos
+    for (const [deckCardId, deckCard] of this.deckCards.entries()) {
+      if (deckCard.deckId === id) {
+        this.deckCards.delete(deckCardId);
+      }
+    }
+    
+    return true;
+  }
+  
+  async getFlashCardDecksBySubject(userId: number, subject: string): Promise<FlashCardDeck[]> {
+    const decks = Array.from(this.flashCardDecks.values());
+    return decks.filter(deck => 
+      (deck.userId === userId || deck.isPublic) && 
+      deck.subject === subject
+    );
+  }
+  
+  async getPublicFlashCardDecks(): Promise<FlashCardDeck[]> {
+    const decks = Array.from(this.flashCardDecks.values());
+    return decks.filter(deck => deck.isPublic);
+  }
+  
+  // Deck Cards (Relação entre decks e cards)
+  async addFlashCardToDeck(deckId: number, cardId: number, order?: number): Promise<DeckCard> {
+    const deck = await this.getFlashCardDeckById(deckId);
+    if (!deck) throw new Error(`Deck with id ${deckId} not found`);
+    
+    const card = await this.getFlashCardById(cardId);
+    if (!card) throw new Error(`Flash card with id ${cardId} not found`);
+    
+    // Verificar se já existe essa relação
+    const existingRelation = Array.from(this.deckCards.values())
+      .find(dc => dc.deckId === deckId && dc.cardId === cardId);
+    
+    if (existingRelation) return existingRelation;
+    
+    // Se não tiver ordem especificada, adicionar no final
+    if (order === undefined) {
+      const currentCards = Array.from(this.deckCards.values())
+        .filter(dc => dc.deckId === deckId);
+      
+      order = currentCards.length > 0 ? 
+        Math.max(...currentCards.map(c => c.order)) + 1 : 0;
+    }
+    
+    const id = this.currentDeckCardIds++;
+    const newRelation: DeckCard = {
+      id,
+      deckId,
+      cardId,
+      order
+    };
+    
+    this.deckCards.set(id, newRelation);
+    
+    // Atualizar contador de cards no deck
+    const updatedDeck: FlashCardDeck = {
+      ...deck,
+      cardCount: deck.cardCount + 1,
+      updatedAt: new Date()
+    };
+    
+    this.flashCardDecks.set(deckId, updatedDeck);
+    
+    return newRelation;
+  }
+  
+  async removeFlashCardFromDeck(deckId: number, cardId: number): Promise<boolean> {
+    const deck = await this.getFlashCardDeckById(deckId);
+    if (!deck) throw new Error(`Deck with id ${deckId} not found`);
+    
+    // Encontrar a relação
+    const deckCardEntry = Array.from(this.deckCards.entries())
+      .find(([_, dc]) => dc.deckId === deckId && dc.cardId === cardId);
+    
+    if (!deckCardEntry) return false;
+    
+    // Remover a relação
+    this.deckCards.delete(deckCardEntry[0]);
+    
+    // Atualizar contador de cards no deck
+    const updatedDeck: FlashCardDeck = {
+      ...deck,
+      cardCount: Math.max(0, deck.cardCount - 1),
+      updatedAt: new Date()
+    };
+    
+    this.flashCardDecks.set(deckId, updatedDeck);
+    
+    return true;
+  }
+  
+  async getFlashCardsFromDeck(deckId: number): Promise<FlashCard[]> {
+    const deck = await this.getFlashCardDeckById(deckId);
+    if (!deck) throw new Error(`Deck with id ${deckId} not found`);
+    
+    // Encontrar todas as relações deste deck
+    const deckCards = Array.from(this.deckCards.values())
+      .filter(dc => dc.deckId === deckId)
+      .sort((a, b) => a.order - b.order);
+    
+    // Recuperar os cards na ordem correta
+    const cards: FlashCard[] = [];
+    for (const dc of deckCards) {
+      const card = await this.getFlashCardById(dc.cardId);
+      if (card) cards.push(card);
+    }
+    
+    return cards;
+  }
+  
+  async reorderFlashCardInDeck(deckId: number, cardId: number, newOrder: number): Promise<boolean> {
+    // Encontrar a relação a ser atualizada
+    const deckCardEntry = Array.from(this.deckCards.entries())
+      .find(([_, dc]) => dc.deckId === deckId && dc.cardId === cardId);
+    
+    if (!deckCardEntry) return false;
+    
+    const [id, deckCard] = deckCardEntry;
+    
+    // Atualizar a ordem
+    const updatedDeckCard: DeckCard = {
+      ...deckCard,
+      order: newOrder
+    };
+    
+    this.deckCards.set(id, updatedDeckCard);
+    
+    return true;
+  }
+
+  // ===========================================
+  // Exams Implementation
+  // ===========================================
+  
+  async getAllExams(): Promise<Exam[]> {
+    return Array.from(this.exams.values());
+  }
+  
+  async getExamById(id: number): Promise<Exam | undefined> {
+    return this.exams.get(id);
+  }
+  
+  async createExam(exam: InsertExam): Promise<Exam> {
+    const id = this.currentExamIds++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    
+    const newExam: Exam = {
+      ...exam,
+      id,
+      createdAt,
+      updatedAt,
+      questionCount: 0
+    };
+    
+    this.exams.set(id, newExam);
+    return newExam;
+  }
+  
+  async updateExam(id: number, data: Partial<InsertExam>): Promise<Exam> {
+    const exam = await this.getExamById(id);
+    if (!exam) throw new Error(`Exam with id ${id} not found`);
+    
+    const updatedExam: Exam = {
+      ...exam,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.exams.set(id, updatedExam);
+    return updatedExam;
+  }
+  
+  async deleteExam(id: number): Promise<boolean> {
+    const exists = this.exams.has(id);
+    if (!exists) return false;
+    
+    this.exams.delete(id);
+    
+    // Remover todas as questões do exame
+    for (const [examQuestionId, examQuestion] of this.examQuestions.entries()) {
+      if (examQuestion.examId === id) {
+        this.examQuestions.delete(examQuestionId);
+      }
+    }
+    
+    // Remover todas as tentativas relacionadas
+    for (const [attemptId, attempt] of this.examAttempts.entries()) {
+      if (attempt.examId === id) {
+        this.examAttempts.delete(attemptId);
+      }
+    }
+    
+    return true;
+  }
+  
+  async getExamsBySubject(subject: string): Promise<Exam[]> {
+    return Array.from(this.exams.values())
+      .filter(exam => exam.subjects.includes(subject));
+  }
+  
+  async getPublicExams(): Promise<Exam[]> {
+    return Array.from(this.exams.values())
+      .filter(exam => exam.isPublic);
+  }
+  
+  // Exam Questions
+  async addQuestionToExam(examQuestion: InsertExamQuestion): Promise<ExamQuestion> {
+    const exam = await this.getExamById(examQuestion.examId);
+    if (!exam) throw new Error(`Exam with id ${examQuestion.examId} not found`);
+    
+    const question = await this.getQuestionById(examQuestion.questionId);
+    if (!question) throw new Error(`Question with id ${examQuestion.questionId} not found`);
+    
+    const id = this.currentExamQuestionIds++;
+    const newExamQuestion: ExamQuestion = {
+      ...examQuestion,
+      id
+    };
+    
+    this.examQuestions.set(id, newExamQuestion);
+    
+    // Atualizar contador de questões do exame
+    const updatedExam: Exam = {
+      ...exam,
+      questionCount: exam.questionCount + 1,
+      updatedAt: new Date()
+    };
+    
+    this.exams.set(exam.id, updatedExam);
+    
+    return newExamQuestion;
+  }
+  
+  async removeQuestionFromExam(examId: number, questionId: number): Promise<boolean> {
+    const exam = await this.getExamById(examId);
+    if (!exam) throw new Error(`Exam with id ${examId} not found`);
+    
+    // Encontrar a relação
+    const examQuestionEntry = Array.from(this.examQuestions.entries())
+      .find(([_, eq]) => eq.examId === examId && eq.questionId === questionId);
+    
+    if (!examQuestionEntry) return false;
+    
+    // Remover a relação
+    this.examQuestions.delete(examQuestionEntry[0]);
+    
+    // Atualizar contador de questões do exame
+    const updatedExam: Exam = {
+      ...exam,
+      questionCount: Math.max(0, exam.questionCount - 1),
+      updatedAt: new Date()
+    };
+    
+    this.exams.set(examId, updatedExam);
+    
+    return true;
+  }
+  
+  async getQuestionsFromExam(examId: number): Promise<Question[]> {
+    const exam = await this.getExamById(examId);
+    if (!exam) throw new Error(`Exam with id ${examId} not found`);
+    
+    // Encontrar todas as relações deste exame
+    const examQuestions = Array.from(this.examQuestions.values())
+      .filter(eq => eq.examId === examId)
+      .sort((a, b) => a.order - b.order);
+    
+    // Recuperar as questões na ordem correta
+    const questions: Question[] = [];
+    for (const eq of examQuestions) {
+      const question = await this.getQuestionById(eq.questionId);
+      if (question) questions.push(question);
+    }
+    
+    return questions;
+  }
+  
+  async reorderQuestionInExam(examId: number, questionId: number, newOrder: number): Promise<boolean> {
+    // Encontrar a relação a ser atualizada
+    const examQuestionEntry = Array.from(this.examQuestions.entries())
+      .find(([_, eq]) => eq.examId === examId && eq.questionId === questionId);
+    
+    if (!examQuestionEntry) return false;
+    
+    const [id, examQuestion] = examQuestionEntry;
+    
+    // Atualizar a ordem
+    const updatedExamQuestion: ExamQuestion = {
+      ...examQuestion,
+      order: newOrder
+    };
+    
+    this.examQuestions.set(id, updatedExamQuestion);
+    
+    return true;
+  }
+  
+  // Exam Attempts
+  async createExamAttempt(attempt: InsertExamAttempt): Promise<ExamAttempt> {
+    const id = this.currentExamAttemptIds++;
+    const startedAt = attempt.startedAt || new Date();
+    
+    const newAttempt: ExamAttempt = {
+      ...attempt,
+      id,
+      startedAt,
+      completedAt: null,
+      status: attempt.status || "in_progress"
+    };
+    
+    this.examAttempts.set(id, newAttempt);
+    return newAttempt;
+  }
+  
+  async updateExamAttempt(id: number, data: Partial<InsertExamAttempt>): Promise<ExamAttempt> {
+    const attempt = await this.getExamAttempt(id);
+    if (!attempt) throw new Error(`Exam attempt with id ${id} not found`);
+    
+    const updatedAttempt: ExamAttempt = {
+      ...attempt,
+      ...data
+    };
+    
+    // Se o status está mudando para completado, adicionar timestamp de conclusão
+    if (data.status === "completed" && attempt.status !== "completed") {
+      updatedAttempt.completedAt = new Date();
+    }
+    
+    this.examAttempts.set(id, updatedAttempt);
+    return updatedAttempt;
+  }
+  
+  async getExamAttempt(id: number): Promise<ExamAttempt | undefined> {
+    return this.examAttempts.get(id);
+  }
+  
+  async getExamAttemptsByUser(userId: number): Promise<ExamAttempt[]> {
+    return Array.from(this.examAttempts.values())
+      .filter(attempt => attempt.userId === userId)
+      .sort((a, b) => (b.startedAt?.getTime() || 0) - (a.startedAt?.getTime() || 0));
+  }
+  
+  async getExamAttemptsByExam(examId: number): Promise<ExamAttempt[]> {
+    return Array.from(this.examAttempts.values())
+      .filter(attempt => attempt.examId === examId)
+      .sort((a, b) => (b.startedAt?.getTime() || 0) - (a.startedAt?.getTime() || 0));
+  }
+  
+  async getExamAttemptsByUserAndExam(userId: number, examId: number): Promise<ExamAttempt[]> {
+    return Array.from(this.examAttempts.values())
+      .filter(attempt => attempt.userId === userId && attempt.examId === examId)
+      .sort((a, b) => (b.startedAt?.getTime() || 0) - (a.startedAt?.getTime() || 0));
+  }
+
+  // ===========================================
+  // Forums Implementation
+  // ===========================================
+  
+  async getAllForums(): Promise<Forum[]> {
+    return Array.from(this.forums.values());
+  }
+  
+  async getForumById(id: number): Promise<Forum | undefined> {
+    return this.forums.get(id);
+  }
+  
+  async createForum(forum: InsertForum): Promise<Forum> {
+    const id = this.currentForumIds++;
+    const createdAt = new Date();
+    
+    const newForum: Forum = {
+      ...forum,
+      id,
+      createdAt,
+      threadCount: 0,
+      postCount: 0
+    };
+    
+    this.forums.set(id, newForum);
+    return newForum;
+  }
+  
+  async getForumsBySubject(subject: string): Promise<Forum[]> {
+    return Array.from(this.forums.values())
+      .filter(forum => forum.subject === subject);
+  }
+  
+  // Forum Threads
+  async getAllThreads(forumId: number): Promise<ForumThread[]> {
+    const forum = await this.getForumById(forumId);
+    if (!forum) throw new Error(`Forum with id ${forumId} not found`);
+    
+    return Array.from(this.forumThreads.values())
+      .filter(thread => thread.forumId === forumId)
+      .sort((a, b) => {
+        // Primeiro os fixados
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        
+        // Depois por data da última resposta ou criação
+        const aTime = a.lastReplyAt?.getTime() || a.createdAt?.getTime() || 0;
+        const bTime = b.lastReplyAt?.getTime() || b.createdAt?.getTime() || 0;
+        return bTime - aTime;
+      });
+  }
+  
+  async getThreadById(id: number): Promise<ForumThread | undefined> {
+    return this.forumThreads.get(id);
+  }
+  
+  async createThread(thread: InsertForumThread): Promise<ForumThread> {
+    const forum = await this.getForumById(thread.forumId);
+    if (!forum) throw new Error(`Forum with id ${thread.forumId} not found`);
+    
+    const id = this.currentForumThreadIds++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    
+    const newThread: ForumThread = {
+      ...thread,
+      id,
+      createdAt,
+      updatedAt,
+      viewCount: 0,
+      replyCount: 0,
+      lastReplyAt: null
+    };
+    
+    this.forumThreads.set(id, newThread);
+    
+    // Atualizar o contador de threads do fórum
+    const updatedForum: Forum = {
+      ...forum,
+      threadCount: forum.threadCount + 1
+    };
+    
+    this.forums.set(forum.id, updatedForum);
+    
+    return newThread;
+  }
+  
+  async updateThread(id: number, data: Partial<InsertForumThread>): Promise<ForumThread> {
+    const thread = await this.getThreadById(id);
+    if (!thread) throw new Error(`Thread with id ${id} not found`);
+    
+    const updatedThread: ForumThread = {
+      ...thread,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.forumThreads.set(id, updatedThread);
+    return updatedThread;
+  }
+  
+  async getRecentThreads(limit?: number): Promise<ForumThread[]> {
+    const threads = Array.from(this.forumThreads.values())
+      .sort((a, b) => {
+        const aTime = a.updatedAt?.getTime() || a.createdAt?.getTime() || 0;
+        const bTime = b.updatedAt?.getTime() || b.createdAt?.getTime() || 0;
+        return bTime - aTime;
+      });
+    
+    return limit ? threads.slice(0, limit) : threads;
+  }
+  
+  // Forum Posts
+  async getPostsByThread(threadId: number): Promise<ForumPost[]> {
+    const thread = await this.getThreadById(threadId);
+    if (!thread) throw new Error(`Thread with id ${threadId} not found`);
+    
+    // Incrementar contador de visualizações
+    const updatedThread: ForumThread = {
+      ...thread,
+      viewCount: thread.viewCount + 1
+    };
+    
+    this.forumThreads.set(threadId, updatedThread);
+    
+    return Array.from(this.forumPosts.values())
+      .filter(post => post.threadId === threadId)
+      .sort((a, b) => {
+        // Organizar respostas em árvore
+        if (a.parentId === null && b.parentId !== null) return -1;
+        if (a.parentId !== null && b.parentId === null) return 1;
+        if (a.parentId !== b.parentId) return (a.parentId || 0) - (b.parentId || 0);
+        
+        // Ordenar por data de criação
+        return (a.createdAt?.getTime() || 0) - (b.createdAt?.getTime() || 0);
+      });
+  }
+  
+  async getPostById(id: number): Promise<ForumPost | undefined> {
+    return this.forumPosts.get(id);
+  }
+  
+  async createPost(post: InsertForumPost): Promise<ForumPost> {
+    const thread = await this.getThreadById(post.threadId);
+    if (!thread) throw new Error(`Thread with id ${post.threadId} not found`);
+    
+    // Verificar se o parent existe (se for resposta)
+    if (post.parentId) {
+      const parentPost = await this.getPostById(post.parentId);
+      if (!parentPost) throw new Error(`Parent post with id ${post.parentId} not found`);
+    }
+    
+    const id = this.currentForumPostIds++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    
+    const newPost: ForumPost = {
+      ...post,
+      id,
+      createdAt,
+      updatedAt
+    };
+    
+    this.forumPosts.set(id, newPost);
+    
+    // Atualizar o contador de respostas do thread
+    const updatedThread: ForumThread = {
+      ...thread,
+      replyCount: thread.replyCount + 1,
+      lastReplyAt: createdAt
+    };
+    
+    this.forumThreads.set(thread.id, updatedThread);
+    
+    // Atualizar o contador de posts do fórum
+    const forum = await this.getForumById(thread.forumId);
+    if (forum) {
+      const updatedForum: Forum = {
+        ...forum,
+        postCount: forum.postCount + 1
+      };
+      
+      this.forums.set(forum.id, updatedForum);
+    }
+    
+    return newPost;
+  }
+  
+  async updatePost(id: number, data: Partial<InsertForumPost>): Promise<ForumPost> {
+    const post = await this.getPostById(id);
+    if (!post) throw new Error(`Post with id ${id} not found`);
+    
+    const updatedPost: ForumPost = {
+      ...post,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.forumPosts.set(id, updatedPost);
+    return updatedPost;
+  }
+  
+  async getRecentPosts(limit?: number): Promise<ForumPost[]> {
+    const posts = Array.from(this.forumPosts.values())
+      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+    
+    return limit ? posts.slice(0, limit) : posts;
+  }
 }
 
 export const storage = new MemStorage();
