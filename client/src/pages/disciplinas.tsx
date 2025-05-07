@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudyMaterialCard } from "@/components/ui/study-material-card";
 import { SubjectCard } from "@/components/ui/subject-card";
 import { QuestionCard } from "@/components/ui/question-card";
-import { Link, useParams } from "wouter";
+import { Link, useParams, useLocation } from "wouter";
 import { 
   Book, 
   Calculator, 
@@ -25,6 +25,7 @@ import { Progress } from "@/components/ui/progress";
 
 export default function Disciplinas() {
   const { subject } = useParams();
+  const [, navigate] = useLocation();
   
   // Fetch subjects
   const { data: subjectsData, isLoading: loadingSubjects } = useQuery({
@@ -309,6 +310,76 @@ export default function Disciplinas() {
                 </Card>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Latest Video Lessons */}
+        <div className="mb-10">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Últimas Aulas Adicionadas</h2>
+            <Link href={`/videos?subject=${currentSubject.id}`}>
+              <Button variant="outline" className="flex items-center gap-1">
+                Ver todas as aulas
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Video lesson cards would load from the API, using placeholders for now */}
+            {[1, 2, 3].map((id) => (
+              <Card key={id} className="overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow">
+                <div className="h-48 overflow-hidden bg-gray-100">
+                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                    <div className="text-gray-400">Thumbnail da aula</div>
+                  </div>
+                </div>
+                <CardHeader className="pb-2">
+                  <CardTitle className="line-clamp-2">{`Aula sobre ${currentSubject.name} - Parte ${id}`}</CardTitle>
+                  <CardDescription className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    20 minutos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pb-4 flex-grow">
+                  <p className="text-sm text-gray-700 line-clamp-3 mb-2">
+                    {`Conteúdo fundamental sobre ${currentSubject.name} para o ENEM, abordando os principais conceitos e técnicas aplicadas.`}
+                  </p>
+                </CardContent>
+                <div className="px-6 pb-6">
+                  <Button onClick={() => navigate(`/videos/${id}?subject=${currentSubject.id}`)} className="w-full">
+                    Assistir Aula
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Categories/Modules */}
+        <div className="mb-10">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Categorias e Módulos</h2>
+            <Button variant="outline" className="flex items-center gap-1">
+              Ver todas as categorias
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {["Fundamentos", "Exercícios Práticos", "Conteúdo Avançado", "Resolução de Problemas", "Testes Simulados", "Tópicos Especiais"].map((category, index) => (
+              <Card key={index} className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">{category}</CardTitle>
+                  <CardDescription>
+                    {`${Math.floor(Math.random() * 10) + 5} aulas disponíveis`}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="outline" className="w-full" onClick={() => navigate(`/categorias/${index}?subject=${currentSubject.id}`)}>
+                    Explorar
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
 
