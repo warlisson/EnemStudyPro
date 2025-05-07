@@ -365,11 +365,11 @@ export default function VideoDetail() {
                 <h3 className="text-xl font-bold mb-2">Professor</h3>
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-12 w-12">
-                    <AvatarFallback>{video.professor.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>{video.professor ? video.professor.charAt(0) : 'P'}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">{video.professor}</p>
-                    <p className="text-sm text-muted-foreground">Professor de {video.subject}</p>
+                    <p className="font-medium">{video.professor || 'Professor'}</p>
+                    <p className="text-sm text-muted-foreground">Professor de {video.subject || 'ENEM'}</p>
                   </div>
                 </div>
               </div>
@@ -575,7 +575,7 @@ export default function VideoDetail() {
           <Card>
             <CardHeader>
               <CardTitle>Vídeos Relacionados</CardTitle>
-              <CardDescription>Mais sobre {video.subject}</CardDescription>
+              <CardDescription>Mais sobre {video.subject || 'ENEM'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
@@ -584,11 +584,13 @@ export default function VideoDetail() {
                     Todos os vídeos
                   </Link>
                 </Button>
-                <Button variant="outline" className="text-sm" asChild>
-                  <Link href={`/videos?subject=${video.subject}`}>
-                    {video.subject}
-                  </Link>
-                </Button>
+                {video.subject && (
+                  <Button variant="outline" className="text-sm" asChild>
+                    <Link href={`/videos?subject=${video.subject}`}>
+                      {video.subject}
+                    </Link>
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
