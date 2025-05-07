@@ -9,7 +9,9 @@ import {
   MapPin,
   Box,
   Video,
-  FileText
+  FileText,
+  FolderOpen,
+  Calendar
 } from "lucide-react";
 
 const subjectColors: Record<string, { dot: string, hover: string, text: string }> = {
@@ -36,6 +38,8 @@ const mainNavItems = [
   { label: "Vídeo-aulas", href: "/videos", icon: Video },
   { label: "Artigos", href: "/artigos", icon: FileText },
   { label: "Trilhas de Aprendizado", href: "/trilhas", icon: MapPin },
+  { label: "Arquivos", href: "/arquivos", icon: FolderOpen },
+  { label: "Plano de Estudos", href: "/plano-estudos", icon: Calendar },
 ];
 
 export type Subject = {

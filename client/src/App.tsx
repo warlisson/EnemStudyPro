@@ -18,6 +18,8 @@ import ArtigoDetail from "@/pages/artigo-detail";
 import Trilhas from "@/pages/trilhas";
 import TrilhaDetail from "@/pages/trilha-detail";
 import AulaDetail from "@/pages/aula-detail";
+import Arquivos from "@/pages/arquivos";
+import PlanoEstudos from "@/pages/plano-estudos";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -39,6 +41,10 @@ function Router() {
         <Route path="/trilhas" component={Trilhas} />
         <Route path="/trilhas/:id" component={TrilhaDetail} />
         <Route path="/aula/:id" component={AulaDetail} />
+        <Route path="/arquivos" component={Arquivos} />
+        <Route path="/arquivos/:folderId" component={Arquivos} />
+        <Route path="/plano-estudos" component={PlanoEstudos} />
+        <Route path="/plano-estudos/:planId" component={PlanoEstudos} />
         
         {/* Fallback to 404 */}
         <Route component={NotFound} />
