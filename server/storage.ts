@@ -4,7 +4,14 @@ import {
   questions, type Question, type InsertQuestion,
   studyMaterials, type StudyMaterial, type InsertStudyMaterial,
   userPerformance, type UserPerformance, type InsertUserPerformance,
-  news, type News, type InsertNews
+  news, type News, type InsertNews,
+  videoLessons, type VideoLesson, type InsertVideoLesson,
+  videoProgress, type VideoProgress, type InsertVideoProgress,
+  videoRatings, type VideoRating, type InsertVideoRating,
+  videoComments, type VideoComment, type InsertVideoComment,
+  categories, type Category, type InsertCategory,
+  videoCategoryRelations, type VideoCategoryRelation, type InsertVideoCategoryRelation,
+  videoExercises, type VideoExercise, type InsertVideoExercise
 } from "@shared/schema";
 
 // Storage interface
@@ -42,6 +49,40 @@ export interface IStorage {
   getNews(): Promise<News[]>;
   getNewsById(id: number): Promise<News | undefined>;
   createNews(newsItem: InsertNews): Promise<News>;
+  
+  // Video Lessons
+  getAllVideoLessons(): Promise<VideoLesson[]>;
+  getVideoLessonsBySubject(subject: string): Promise<VideoLesson[]>;
+  getVideoLessonsByCategory(categoryId: number): Promise<VideoLesson[]>;
+  getRecentVideoLessons(limit?: number): Promise<VideoLesson[]>;
+  getVideoLessonById(id: number): Promise<VideoLesson | undefined>;
+  createVideoLesson(videoLesson: InsertVideoLesson): Promise<VideoLesson>;
+  incrementVideoViews(id: number): Promise<void>;
+  
+  // Video Progress
+  getVideoProgress(userId: number, videoId: number): Promise<VideoProgress | undefined>;
+  updateVideoProgress(userId: number, videoId: number, progress: number): Promise<VideoProgress>;
+  setVideoWatched(userId: number, videoId: number, watched: boolean): Promise<VideoProgress>;
+  toggleVideoFavorite(userId: number, videoId: number): Promise<VideoProgress>;
+  getFavoriteVideos(userId: number): Promise<VideoLesson[]>;
+  getWatchedVideos(userId: number): Promise<VideoLesson[]>;
+  
+  // Video Ratings and Comments
+  getVideoRatings(videoId: number): Promise<VideoRating[]>;
+  addVideoRating(rating: InsertVideoRating): Promise<VideoRating>;
+  getAverageVideoRating(videoId: number): Promise<number>;
+  getVideoComments(videoId: number): Promise<VideoComment[]>;
+  addVideoComment(comment: InsertVideoComment): Promise<VideoComment>;
+  
+  // Categories
+  getAllCategories(): Promise<Category[]>;
+  getCategoriesBySubject(subject: string): Promise<Category[]>;
+  getCategoryById(id: number): Promise<Category | undefined>;
+  createCategory(category: InsertCategory): Promise<Category>;
+  
+  // Video Exercises
+  getVideoExercises(videoId: number): Promise<Question[]>;
+  addVideoExercise(videoExercise: InsertVideoExercise): Promise<VideoExercise>;
 }
 
 export class MemStorage implements IStorage {
@@ -51,6 +92,13 @@ export class MemStorage implements IStorage {
   private studyMaterials: Map<number, StudyMaterial>;
   private userPerformance: Map<number, UserPerformance>;
   private news: Map<number, News>;
+  private videoLessons: Map<number, VideoLesson>;
+  private videoProgress: Map<number, VideoProgress>;
+  private videoRatings: Map<number, VideoRating>;
+  private videoComments: Map<number, VideoComment>;
+  private categories: Map<number, Category>;
+  private videoCategoryRelations: Map<number, VideoCategoryRelation>;
+  private videoExercises: Map<number, VideoExercise>;
   
   private currentUserIds: number;
   private currentSubjectIds: number;
@@ -58,6 +106,13 @@ export class MemStorage implements IStorage {
   private currentMaterialIds: number;
   private currentPerformanceIds: number;
   private currentNewsIds: number;
+  private currentVideoLessonIds: number;
+  private currentVideoProgressIds: number;
+  private currentVideoRatingIds: number;
+  private currentVideoCommentIds: number;
+  private currentCategoryIds: number;
+  private currentVideoCategoryRelationIds: number;
+  private currentVideoExerciseIds: number;
 
   constructor() {
     this.users = new Map();
@@ -66,6 +121,13 @@ export class MemStorage implements IStorage {
     this.studyMaterials = new Map();
     this.userPerformance = new Map();
     this.news = new Map();
+    this.videoLessons = new Map();
+    this.videoProgress = new Map();
+    this.videoRatings = new Map();
+    this.videoComments = new Map();
+    this.categories = new Map();
+    this.videoCategoryRelations = new Map();
+    this.videoExercises = new Map();
     
     this.currentUserIds = 1;
     this.currentSubjectIds = 1;
@@ -73,6 +135,13 @@ export class MemStorage implements IStorage {
     this.currentMaterialIds = 1;
     this.currentPerformanceIds = 1;
     this.currentNewsIds = 1;
+    this.currentVideoLessonIds = 1;
+    this.currentVideoProgressIds = 1;
+    this.currentVideoRatingIds = 1;
+    this.currentVideoCommentIds = 1;
+    this.currentCategoryIds = 1;
+    this.currentVideoCategoryRelationIds = 1;
+    this.currentVideoExerciseIds = 1;
     
     // Initialize with some data
     this.initializeData();
@@ -351,6 +420,252 @@ export class MemStorage implements IStorage {
     const newsItem: News = { ...insertNews, id, publishedAt: new Date() };
     this.news.set(id, newsItem);
     return newsItem;
+  }
+  
+  // Video Lessons methods
+  async getAllVideoLessons(): Promise<VideoLesson[]> {
+    return Array.from(this.videoLessons.values());
+  }
+  
+  async getVideoLessonsBySubject(subject: string): Promise<VideoLesson[]> {
+    return Array.from(this.videoLessons.values()).filter(
+      (video) => video.subject === subject,
+    );
+  }
+  
+  async getVideoLessonsByCategory(categoryId: number): Promise<VideoLesson[]> {
+    const relations = Array.from(this.videoCategoryRelations.values())
+      .filter(relation => relation.categoryId === categoryId)
+      .map(relation => relation.videoId);
+      
+    return Array.from(this.videoLessons.values()).filter(
+      (video) => relations.includes(video.id),
+    );
+  }
+  
+  async getRecentVideoLessons(limit: number = 6): Promise<VideoLesson[]> {
+    return Array.from(this.videoLessons.values())
+      .sort((a, b) => {
+        if (a.publishedAt && b.publishedAt) {
+          return b.publishedAt.getTime() - a.publishedAt.getTime();
+        }
+        return 0;
+      })
+      .slice(0, limit);
+  }
+  
+  async getVideoLessonById(id: number): Promise<VideoLesson | undefined> {
+    return this.videoLessons.get(id);
+  }
+  
+  async createVideoLesson(videoLesson: InsertVideoLesson): Promise<VideoLesson> {
+    const id = this.currentVideoLessonIds++;
+    const video: VideoLesson = { 
+      ...videoLesson, 
+      id, 
+      publishedAt: new Date(),
+      viewCount: 0
+    };
+    this.videoLessons.set(id, video);
+    return video;
+  }
+  
+  async incrementVideoViews(id: number): Promise<void> {
+    const video = await this.getVideoLessonById(id);
+    if (video) {
+      video.viewCount += 1;
+      this.videoLessons.set(id, video);
+    }
+  }
+  
+  // Video Progress methods
+  async getVideoProgress(userId: number, videoId: number): Promise<VideoProgress | undefined> {
+    return Array.from(this.videoProgress.values()).find(
+      (progress) => progress.userId === userId && progress.videoId === videoId,
+    );
+  }
+  
+  async updateVideoProgress(userId: number, videoId: number, progress: number): Promise<VideoProgress> {
+    let videoProgress = await this.getVideoProgress(userId, videoId);
+    
+    if (videoProgress) {
+      videoProgress.progress = progress;
+      videoProgress.lastWatched = new Date();
+      // Auto-mark as watched if progress is > 90%
+      if (progress > 0.9) {
+        videoProgress.watched = true;
+      }
+      this.videoProgress.set(videoProgress.id, videoProgress);
+      return videoProgress;
+    }
+    
+    // Create a new progress entry if none exists
+    const id = this.currentVideoProgressIds++;
+    videoProgress = { 
+      id, 
+      userId, 
+      videoId, 
+      progress, 
+      watched: progress > 0.9,
+      favorite: false,
+      lastWatched: new Date()
+    };
+    this.videoProgress.set(id, videoProgress);
+    return videoProgress;
+  }
+  
+  async setVideoWatched(userId: number, videoId: number, watched: boolean): Promise<VideoProgress> {
+    let videoProgress = await this.getVideoProgress(userId, videoId);
+    
+    if (videoProgress) {
+      videoProgress.watched = watched;
+      videoProgress.lastWatched = new Date();
+      this.videoProgress.set(videoProgress.id, videoProgress);
+      return videoProgress;
+    }
+    
+    // Create a new progress entry if none exists
+    const id = this.currentVideoProgressIds++;
+    videoProgress = { 
+      id, 
+      userId, 
+      videoId, 
+      progress: watched ? 1 : 0, 
+      watched,
+      favorite: false,
+      lastWatched: new Date()
+    };
+    this.videoProgress.set(id, videoProgress);
+    return videoProgress;
+  }
+  
+  async toggleVideoFavorite(userId: number, videoId: number): Promise<VideoProgress> {
+    let videoProgress = await this.getVideoProgress(userId, videoId);
+    
+    if (videoProgress) {
+      videoProgress.favorite = !videoProgress.favorite;
+      this.videoProgress.set(videoProgress.id, videoProgress);
+      return videoProgress;
+    }
+    
+    // Create a new progress entry if none exists
+    const id = this.currentVideoProgressIds++;
+    videoProgress = { 
+      id, 
+      userId, 
+      videoId, 
+      progress: 0, 
+      watched: false,
+      favorite: true,
+      lastWatched: new Date()
+    };
+    this.videoProgress.set(id, videoProgress);
+    return videoProgress;
+  }
+  
+  async getFavoriteVideos(userId: number): Promise<VideoLesson[]> {
+    const favoriteIds = Array.from(this.videoProgress.values())
+      .filter(progress => progress.userId === userId && progress.favorite)
+      .map(progress => progress.videoId);
+      
+    return Array.from(this.videoLessons.values()).filter(
+      (video) => favoriteIds.includes(video.id),
+    );
+  }
+  
+  async getWatchedVideos(userId: number): Promise<VideoLesson[]> {
+    const watchedIds = Array.from(this.videoProgress.values())
+      .filter(progress => progress.userId === userId && progress.watched)
+      .map(progress => progress.videoId);
+      
+    return Array.from(this.videoLessons.values()).filter(
+      (video) => watchedIds.includes(video.id),
+    );
+  }
+  
+  // Video Ratings and Comments methods
+  async getVideoRatings(videoId: number): Promise<VideoRating[]> {
+    return Array.from(this.videoRatings.values()).filter(
+      (rating) => rating.videoId === videoId,
+    );
+  }
+  
+  async addVideoRating(rating: InsertVideoRating): Promise<VideoRating> {
+    const id = this.currentVideoRatingIds++;
+    const videoRating: VideoRating = { ...rating, id, createdAt: new Date() };
+    this.videoRatings.set(id, videoRating);
+    return videoRating;
+  }
+  
+  async getAverageVideoRating(videoId: number): Promise<number> {
+    const ratings = await this.getVideoRatings(videoId);
+    if (ratings.length === 0) return 0;
+    
+    const sum = ratings.reduce((total, rating) => total + rating.rating, 0);
+    return sum / ratings.length;
+  }
+  
+  async getVideoComments(videoId: number): Promise<VideoComment[]> {
+    return Array.from(this.videoComments.values())
+      .filter(comment => comment.videoId === videoId)
+      .sort((a, b) => {
+        if (a.createdAt && b.createdAt) {
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        }
+        return 0;
+      });
+  }
+  
+  async addVideoComment(comment: InsertVideoComment): Promise<VideoComment> {
+    const id = this.currentVideoCommentIds++;
+    const videoComment: VideoComment = { ...comment, id, createdAt: new Date() };
+    this.videoComments.set(id, videoComment);
+    return videoComment;
+  }
+  
+  // Categories methods
+  async getAllCategories(): Promise<Category[]> {
+    return Array.from(this.categories.values());
+  }
+  
+  async getCategoriesBySubject(subject: string): Promise<Category[]> {
+    return Array.from(this.categories.values()).filter(
+      (category) => category.subject === subject,
+    );
+  }
+  
+  async getCategoryById(id: number): Promise<Category | undefined> {
+    return this.categories.get(id);
+  }
+  
+  async createCategory(category: InsertCategory): Promise<Category> {
+    const id = this.currentCategoryIds++;
+    const newCategory: Category = { ...category, id, createdAt: new Date() };
+    this.categories.set(id, newCategory);
+    return newCategory;
+  }
+  
+  // Video Exercises methods
+  async getVideoExercises(videoId: number): Promise<Question[]> {
+    const exercisesIds = Array.from(this.videoExercises.values())
+      .filter(exercise => exercise.videoId === videoId)
+      .sort((a, b) => a.orderInVideo - b.orderInVideo)
+      .map(exercise => exercise.questionId);
+    
+    const questions: Question[] = [];
+    for (const id of exercisesIds) {
+      const question = await this.getQuestionById(id);
+      if (question) questions.push(question);
+    }
+    
+    return questions;
+  }
+  
+  async addVideoExercise(exercise: InsertVideoExercise): Promise<VideoExercise> {
+    const id = this.currentVideoExerciseIds++;
+    const videoExercise: VideoExercise = { ...exercise, id };
+    this.videoExercises.set(id, videoExercise);
+    return videoExercise;
   }
 }
 
