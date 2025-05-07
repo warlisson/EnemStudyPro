@@ -276,10 +276,10 @@ export default function Home() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-neutral-800">Disciplinas Populares</h2>
           <Link href="/disciplinas">
-            <a className="text-primary hover:text-primary-700 text-sm font-medium flex items-center">
+            <div className="text-primary hover:text-primary-700 text-sm font-medium flex items-center cursor-pointer">
               Ver todas
               <ChevronRight className="ml-1 h-4 w-4" />
-            </a>
+            </div>
           </Link>
         </div>
         
@@ -306,10 +306,10 @@ export default function Home() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-neutral-800">Seu Desempenho</h2>
           <Link href="/desempenho">
-            <a className="text-primary hover:text-primary-700 text-sm font-medium flex items-center">
+            <div className="text-primary hover:text-primary-700 text-sm font-medium flex items-center cursor-pointer">
               Ver detalhes
               <ChevronRight className="ml-1 h-4 w-4" />
-            </a>
+            </div>
           </Link>
         </div>
         
