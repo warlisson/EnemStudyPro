@@ -55,8 +55,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error fetching recent materials" });
     }
   });
+  
+  app.get('/api/materials', async (req, res) => {
+    try {
+      const materials = await storage.getAllMaterials();
+      res.json(materials);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching all materials" });
+    }
+  });
+  
+  app.get('/api/materials/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid material ID" });
+      }
+      const material = await storage.getMaterialById(id);
+      if (!material) {
+        return res.status(404).json({ message: "Material not found" });
+      }
+      res.json(material);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching material details" });
+    }
+  });
 
-  app.get('/api/materials/:subject', async (req, res) => {
+  app.get('/api/materials/subject/:subject', async (req, res) => {
     try {
       const subject = req.params.subject;
       const materials = await storage.getMaterialsBySubject(subject);

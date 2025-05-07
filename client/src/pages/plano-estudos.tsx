@@ -1217,7 +1217,7 @@ export default function PlanoEstudos() {
                         {getActivityIcon(activity.type)}
                       </div>
                       <div>
-                        <Badge className={getActivityColor(activity.type)} className="text-xs mb-1">
+                        <Badge className={`${getActivityColor(activity.type)} text-xs mb-1`}>
                           {activity.type === "video" ? "Vídeo" : 
                           activity.type === "reading" ? "Leitura" : 
                           activity.type === "exercise" ? "Exercício" : 
