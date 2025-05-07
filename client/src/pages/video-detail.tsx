@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useLocation } from "wouter";
+import { useParams, useLocation, Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import MainLayout from "@/components/layout/main-layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -30,7 +29,7 @@ import {
 
 export default function VideoDetail() {
   const { id } = useParams();
-  const videoId = parseInt(id);
+  const videoId = parseInt(id || "");
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -77,10 +76,7 @@ export default function VideoDetail() {
   // Update progress mutation
   const updateProgressMutation = useMutation({
     mutationFn: async (progressData: { userId: number, progress: number }) => {
-      return apiRequest(`/api/videos/${videoId}/progress`, {
-        method: 'POST',
-        body: JSON.stringify(progressData),
-      });
+      return apiRequest("POST", `/api/videos/${videoId}/progress`, progressData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/videos', videoId, 'progress'] });
@@ -90,10 +86,7 @@ export default function VideoDetail() {
   // Toggle watched mutation
   const toggleWatchedMutation = useMutation({
     mutationFn: async (watched: boolean) => {
-      return apiRequest(`/api/videos/${videoId}/watched`, {
-        method: 'POST',
-        body: JSON.stringify({ userId, watched }),
-      });
+      return apiRequest("POST", `/api/videos/${videoId}/watched`, { userId, watched });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/videos', videoId, 'progress'] });
@@ -107,10 +100,7 @@ export default function VideoDetail() {
   // Toggle favorite mutation
   const toggleFavoriteMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest(`/api/videos/${videoId}/favorite`, {
-        method: 'POST',
-        body: JSON.stringify({ userId }),
-      });
+      return apiRequest("POST", `/api/videos/${videoId}/favorite`, { userId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/videos', videoId, 'progress'] });
@@ -124,10 +114,7 @@ export default function VideoDetail() {
   // Add comment mutation
   const addCommentMutation = useMutation({
     mutationFn: async (commentData: { userId: number, content: string, isQuestion: boolean }) => {
-      return apiRequest(`/api/videos/${videoId}/comments`, {
-        method: 'POST',
-        body: JSON.stringify(commentData),
-      });
+      return apiRequest("POST", `/api/videos/${videoId}/comments`, commentData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/videos', videoId, 'comments'] });
@@ -212,334 +199,321 @@ export default function VideoDetail() {
 
   if (isNaN(videoId)) {
     return (
-      <MainLayout>
-        <div className="flex flex-col items-center justify-center h-full p-8">
-          <h1 className="text-2xl font-bold mb-4">ID de vídeo inválido</h1>
-          <Button onClick={() => navigate("/videos")}>Voltar para vídeos</Button>
-        </div>
-      </MainLayout>
+      <div className="flex flex-col items-center justify-center h-full p-8">
+        <h1 className="text-2xl font-bold mb-4">ID de vídeo inválido</h1>
+        <Button onClick={() => navigate("/videos")}>Voltar para vídeos</Button>
+      </div>
     );
   }
 
   if (isLoading) {
     return (
-      <MainLayout>
-        <div className="flex justify-center items-center h-full">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      </MainLayout>
+      <div className="flex justify-center items-center h-full">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
     );
   }
 
   if (!video) {
     return (
-      <MainLayout>
-        <div className="flex flex-col items-center justify-center h-full p-8">
-          <h1 className="text-2xl font-bold mb-4">Vídeo não encontrado</h1>
-          <Button onClick={() => navigate("/videos")}>Voltar para vídeos</Button>
-        </div>
-      </MainLayout>
+      <div className="flex flex-col items-center justify-center h-full p-8">
+        <h1 className="text-2xl font-bold mb-4">Vídeo não encontrado</h1>
+        <Button onClick={() => navigate("/videos")}>Voltar para vídeos</Button>
+      </div>
     );
   }
 
   return (
-    <MainLayout>
-      <div className="flex flex-col space-y-6 p-6">
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/videos")}
-            className="flex items-center mr-2"
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Voltar
-          </Button>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight flex-grow truncate">
-            {video.title}
-          </h1>
-        </div>
+    <div className="flex flex-col space-y-6 p-6">
+      <div className="flex items-center">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/videos")}
+          className="flex items-center mr-2"
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Voltar
+        </Button>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight flex-grow truncate">
+          {video.title}
+        </h1>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="relative bg-black rounded-lg overflow-hidden">
-              <video
-                ref={videoRef}
-                src={video.videoUrl}
-                poster={video.thumbnailUrl}
-                controls
-                className="w-full aspect-video"
-                onTimeUpdate={handleTimeUpdate}
-              ></video>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="relative bg-black rounded-lg overflow-hidden">
+            <video
+              ref={videoRef}
+              src={video.videoUrl}
+              poster={video.thumbnailUrl}
+              controls
+              className="w-full aspect-video"
+              onTimeUpdate={handleTimeUpdate}
+            ></video>
+          </div>
 
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleToggleWatched}
-                  className={cn(
-                    "flex items-center",
-                    progress?.watched && "bg-primary/10"
-                  )}
-                >
-                  {progress?.watched ? (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Assistido
-                    </>
-                  ) : (
-                    <>
-                      <BookOpenCheck className="h-4 w-4 mr-2" />
-                      Marcar como assistido
-                    </>
-                  )}
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleToggleFavorite}
-                  className={cn(
-                    "flex items-center",
-                    progress?.favorite && "bg-primary/10"
-                  )}
-                >
-                  <Heart
-                    className={cn(
-                      "h-4 w-4 mr-2",
-                      progress?.favorite && "fill-red-500 text-red-500"
-                    )}
-                  />
-                  {progress?.favorite ? "Favoritado" : "Favoritar"}
-                </Button>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="icon">
-                  <Share2 className="h-4 w-4" />
-                </Button>
-                {video.attachments && video.attachments.length > 0 && (
-                  <Button variant="ghost" size="icon">
-                    <Download className="h-4 w-4" />
-                  </Button>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleWatched}
+                className={cn(
+                  "flex items-center",
+                  progress?.watched && "bg-primary/10"
                 )}
-              </div>
+              >
+                {progress?.watched ? (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Assistido
+                  </>
+                ) : (
+                  <>
+                    <BookOpenCheck className="h-4 w-4 mr-2" />
+                    Marcar como assistido
+                  </>
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleFavorite}
+                className={cn(
+                  "flex items-center",
+                  progress?.favorite && "bg-primary/10"
+                )}
+              >
+                <Heart
+                  className={cn(
+                    "h-4 w-4 mr-2",
+                    progress?.favorite && "fill-red-500 text-red-500"
+                  )}
+                />
+                {progress?.favorite ? "Favoritado" : "Favoritar"}
+              </Button>
             </div>
 
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Badge variant="outline" className="flex items-center space-x-1">
-                <Clock className="h-3 w-3" />
-                <span>{formatDuration(video.duration)}</span>
-              </Badge>
-
-              <Badge variant="outline" className="flex items-center space-x-1">
-                <BookOpen className="h-3 w-3" />
-                <span>{getDifficultyText(video.level)}</span>
-              </Badge>
-
-              {video.viewCount && (
-                <Badge variant="outline" className="flex items-center space-x-1">
-                  <Eye className="h-3 w-3" />
-                  <span>{video.viewCount} visualizações</span>
-                </Badge>
-              )}
-
-              {video.averageRating > 0 && (
-                <Badge
-                  variant="outline"
-                  className="flex items-center space-x-1 bg-amber-100 text-amber-800"
-                >
-                  <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
-                  <span>{video.averageRating.toFixed(1)}</span>
-                </Badge>
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="icon">
+                <Share2 className="h-4 w-4" />
+              </Button>
+              {video.attachments && video.attachments.length > 0 && (
+                <Button variant="ghost" size="icon">
+                  <Download className="h-4 w-4" />
+                </Button>
               )}
             </div>
+          </div>
 
-            {currentProgress > 0 && (
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Progresso</span>
-                  <span>{Math.round(currentProgress * 100)}%</span>
-                </div>
-                <Progress value={currentProgress * 100} className="h-2" />
-              </div>
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <Badge variant="outline" className="flex items-center space-x-1">
+              <Clock className="h-3 w-3" />
+              <span>{formatDuration(video.duration)}</span>
+            </Badge>
+
+            <Badge variant="outline" className="flex items-center space-x-1">
+              <BookOpen className="h-3 w-3" />
+              <span>{getDifficultyText(video.level)}</span>
+            </Badge>
+
+            {video.viewCount && (
+              <Badge variant="outline" className="flex items-center space-x-1">
+                <Eye className="h-3 w-3" />
+                <span>{video.viewCount} visualizações</span>
+              </Badge>
             )}
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="mb-4 grid grid-cols-3 lg:grid-cols-4">
-                <TabsTrigger value="description">Descrição</TabsTrigger>
-                <TabsTrigger value="materials">Materiais</TabsTrigger>
-                <TabsTrigger value="exercises">Exercícios</TabsTrigger>
-                <TabsTrigger value="comments">Comentários</TabsTrigger>
-              </TabsList>
+            {video.averageRating > 0 && (
+              <Badge
+                variant="outline"
+                className="flex items-center space-x-1 bg-amber-100 text-amber-800"
+              >
+                <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                <span>{video.averageRating.toFixed(1)}</span>
+              </Badge>
+            )}
+          </div>
 
-              <TabsContent value="description" className="space-y-4">
-                <div>
-                  <h3 className="text-xl font-bold mb-2">Sobre esta aula</h3>
-                  <p className="text-gray-700 whitespace-pre-line">{video.description}</p>
-                </div>
+          {currentProgress > 0 && (
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Progresso</span>
+                <span>{Math.round(currentProgress * 100)}%</span>
+              </div>
+              <Progress value={currentProgress * 100} className="h-2" />
+            </div>
+          )}
 
-                <div>
-                  <h3 className="text-xl font-bold mb-2">Professor</h3>
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback>{video.professor.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{video.professor}</p>
-                      <p className="text-sm text-muted-foreground">Professor de {video.subject}</p>
-                    </div>
-                  </div>
-                </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="mb-4 grid grid-cols-3 lg:grid-cols-4">
+              <TabsTrigger value="description">Descrição</TabsTrigger>
+              <TabsTrigger value="materials">Materiais</TabsTrigger>
+              <TabsTrigger value="exercises">Exercícios</TabsTrigger>
+              <TabsTrigger value="comments">Comentários</TabsTrigger>
+            </TabsList>
 
-                {video.topics && video.topics.length > 0 && (
+            <TabsContent value="description" className="space-y-4">
+              <div>
+                <h3 className="text-xl font-bold mb-2">Sobre esta aula</h3>
+                <p className="text-gray-700 whitespace-pre-line">{video.description}</p>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold mb-2">Professor</h3>
+                <div className="flex items-center space-x-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback>{video.professor.charAt(0)}</AvatarFallback>
+                  </Avatar>
                   <div>
-                    <h3 className="text-xl font-bold mb-2">Tópicos abordados</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {video.topics.map((topic: string) => (
-                        <Badge key={topic} variant="secondary">
-                          {topic}
-                        </Badge>
-                      ))}
-                    </div>
+                    <p className="font-medium">{video.professor}</p>
+                    <p className="text-sm text-muted-foreground">Professor de {video.subject}</p>
                   </div>
-                )}
-              </TabsContent>
+                </div>
+              </div>
 
-              <TabsContent value="materials" className="space-y-4">
-                {video.attachments && video.attachments.length > 0 ? (
-                  <div>
-                    <h3 className="text-xl font-bold mb-4">Materiais Complementares</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {video.attachments.map((attachment: any, index: number) => (
-                        <Card key={index} className="hover:shadow-md transition-shadow">
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-lg">{attachment.name}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <Button asChild variant="outline" className="w-full">
-                              <a href={attachment.url} target="_blank" rel="noopener noreferrer">
-                                <Download className="mr-2 h-4 w-4" />
-                                Download
-                              </a>
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
+              {video.topics && video.topics.length > 0 && (
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Tópicos abordados</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {video.topics.map((topic: string) => (
+                      <Badge key={topic} variant="secondary">
+                        {topic}
+                      </Badge>
+                    ))}
                   </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-lg text-gray-500">Nenhum material complementar disponível para esta aula.</p>
-                  </div>
-                )}
-              </TabsContent>
+                </div>
+              )}
+            </TabsContent>
 
-              <TabsContent value="exercises" className="space-y-4">
-                <h3 className="text-xl font-bold mb-4">Exercícios Relacionados</h3>
-                {exercises?.length > 0 ? (
-                  <div className="space-y-6">
-                    {exercises.map((exercise: any) => (
-                      <Card key={exercise.id}>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Questão {exercise.id}</CardTitle>
-                          <CardDescription>{exercise.examYear || "ENEM"}</CardDescription>
+            <TabsContent value="materials" className="space-y-4">
+              {video.attachments && video.attachments.length > 0 ? (
+                <div>
+                  <h3 className="text-xl font-bold mb-4">Materiais Complementares</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {video.attachments.map((attachment: any, index: number) => (
+                      <Card key={index} className="hover:shadow-md transition-shadow">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">{attachment.name}</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="space-y-2">
-                            <p className="whitespace-pre-line">{exercise.content}</p>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            {exercise.options && exercise.options.map((option: any) => (
-                              <div 
-                                key={option.id} 
-                                className={cn(
-                                  "p-3 rounded-md border",
-                                  exercise.answer === option.id ? "border-green-500 bg-green-50" : "border-gray-200"
-                                )}
-                              >
-                                <p className="flex">
-                                  <span className="font-medium mr-2">{option.id.toUpperCase()})</span>
-                                  <span>{option.text}</span>
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                          
-                          {exercise.explanation && (
-                            <div className="mt-4 p-4 rounded-md bg-blue-50 border border-blue-200">
-                              <h4 className="font-semibold mb-1">Resolução:</h4>
-                              <p className="whitespace-pre-line">{exercise.explanation}</p>
-                            </div>
-                          )}
+                        <CardContent>
+                          <Button asChild variant="outline" className="w-full">
+                            <a href={attachment.url} target="_blank" rel="noopener noreferrer">
+                              <Download className="mr-2 h-4 w-4" />
+                              Download
+                            </a>
+                          </Button>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-lg text-gray-500">Nenhum exercício disponível para esta aula.</p>
-                  </div>
-                )}
-              </TabsContent>
-
-              <TabsContent value="comments" className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-bold mb-4">Deixe seu comentário ou dúvida</h3>
-                  <form onSubmit={handleSubmitComment} className="space-y-4">
-                    <Textarea
-                      placeholder="Escreva seu comentário ou dúvida aqui..."
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      className="min-h-[100px]"
-                    />
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id="isQuestion"
-                          checked={isQuestion}
-                          onChange={(e) => setIsQuestion(e.target.checked)}
-                          className="rounded text-primary"
-                        />
-                        <label htmlFor="isQuestion" className="text-sm">
-                          Marcar como dúvida
-                        </label>
-                      </div>
-                      <Button
-                        type="submit"
-                        disabled={!comment.trim() || addCommentMutation.isPending}
-                      >
-                        {addCommentMutation.isPending ? (
-                          <>Enviando...</>
-                        ) : (
-                          <>
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                            Enviar
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </form>
                 </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-lg text-gray-500">Nenhum material complementar disponível para esta aula.</p>
+                </div>
+              )}
+            </TabsContent>
 
-                <div>
-                  <h3 className="text-xl font-bold mb-4">
-                    Comentários e dúvidas ({comments?.length || 0})
-                  </h3>
-                  
-                  {comments?.length > 0 ? (
-                    <div className="space-y-6">
-                      {comments.map((comment: any) => (
-                        <div key={comment.id} className="space-y-4">
-                          <div className={cn(
-                            "p-4 rounded-lg border",
-                            comment.isQuestion ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-200",
-                            comment.isProfessorResponse && "bg-green-50 border-green-200"
-                          )}>
+            <TabsContent value="exercises" className="space-y-4">
+              <h3 className="text-xl font-bold mb-4">Exercícios Relacionados</h3>
+              {exercises?.length > 0 ? (
+                <div className="space-y-6">
+                  {exercises.map((exercise: any) => (
+                    <Card key={exercise.id}>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Questão {exercise.id}</CardTitle>
+                        <CardDescription>{exercise.examYear || "ENEM"}</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <p className="whitespace-pre-line">{exercise.content}</p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {exercise.options && exercise.options.map((option: any) => (
+                            <div 
+                              key={option.id} 
+                              className={cn(
+                                "p-3 rounded-md border",
+                                exercise.answer === option.id ? "border-green-500 bg-green-50" : "border-gray-200"
+                              )}
+                            >
+                              <p className="flex">
+                                <span className="font-medium mr-2">{option.id.toUpperCase()})</span>
+                                <span>{option.text}</span>
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {exercise.explanation && (
+                          <div className="mt-4 p-4 rounded-md bg-blue-50 border border-blue-200">
+                            <h4 className="font-semibold mb-1">Resolução:</h4>
+                            <p className="whitespace-pre-line">{exercise.explanation}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-lg text-gray-500">Nenhum exercício disponível para esta aula.</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="comments" className="space-y-6">
+              <div>
+                <h3 className="text-xl font-bold mb-4">Deixe seu comentário ou dúvida</h3>
+                <form onSubmit={handleSubmitComment} className="space-y-4">
+                  <Textarea
+                    placeholder="Escreva seu comentário ou dúvida aqui..."
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="isQuestion"
+                        checked={isQuestion}
+                        onChange={(e) => setIsQuestion(e.target.checked)}
+                        className="rounded text-primary"
+                      />
+                      <label htmlFor="isQuestion" className="text-sm">
+                        Marcar como dúvida
+                      </label>
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={!comment.trim() || addCommentMutation.isPending}
+                    >
+                      {addCommentMutation.isPending ? (
+                        <>Enviando...</>
+                      ) : (
+                        <>
+                          <MessageSquare className="mr-2 h-4 w-4" />
+                          Enviar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold mb-4">Comentários</h3>
+                {comments?.length > 0 ? (
+                  <div className="space-y-6">
+                    {comments.length > 0 ? (
+                      comments.map((comment: any) => (
+                        <Card key={comment.id} className={comment.isQuestion ? "border-primary" : ""}>
+                          <CardHeader className="pb-2">
                             <div className="flex justify-between items-start mb-2">
                               <div className="flex items-center space-x-2">
                                 <Avatar className="h-8 w-8">
@@ -547,104 +521,79 @@ export default function VideoDetail() {
                                 </Avatar>
                                 <div>
                                   <p className="font-medium">
-                                    {comment.isProfessorResponse ? "Professor" : "Usuário"}
-                                    {comment.isQuestion && !comment.isProfessorResponse && " (Dúvida)"}
+                                    Usuário
+                                    {comment.isProfessorResponse && (
+                                      <Badge className="ml-2" variant="outline">
+                                        Professor
+                                      </Badge>
+                                    )}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
                                     {new Date(comment.createdAt).toLocaleDateString()}
                                   </p>
                                 </div>
                               </div>
-                              <Button variant="ghost" size="icon">
-                                <ThumbsUp className="h-4 w-4" />
+                              {comment.isQuestion && (
+                                <Badge variant="outline" className="bg-primary/10 text-primary">
+                                  Dúvida
+                                </Badge>
+                              )}
+                            </div>
+                            <CardDescription>{comment.content}</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center space-x-2 text-sm">
+                              <Button variant="ghost" size="sm" className="text-muted-foreground">
+                                <ThumbsUp className="mr-1 h-3 w-3" />
+                                <span>Útil</span>
+                              </Button>
+                              <Button variant="ghost" size="sm" className="text-muted-foreground">
+                                <MessageSquare className="mr-1 h-3 w-3" />
+                                <span>Responder</span>
                               </Button>
                             </div>
-                            <p className="whitespace-pre-line">{comment.content}</p>
-                          </div>
-                          
-                          {/* Replies to this comment */}
-                          {comments
-                            .filter((reply: any) => reply.parentId === comment.id)
-                            .map((reply: any) => (
-                              <div 
-                                key={reply.id} 
-                                className={cn(
-                                  "p-4 rounded-lg border ml-8",
-                                  reply.isProfessorResponse ? "bg-green-50 border-green-200" : "bg-gray-50 border-gray-200"
-                                )}
-                              >
-                                <div className="flex justify-between items-start mb-2">
-                                  <div className="flex items-center space-x-2">
-                                    <Avatar className="h-8 w-8">
-                                      <AvatarFallback>
-                                        {reply.isProfessorResponse ? "P" : "U"}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                      <p className="font-medium">
-                                        {reply.isProfessorResponse ? "Professor" : "Usuário"}
-                                      </p>
-                                      <p className="text-xs text-muted-foreground">
-                                        {new Date(reply.createdAt).toLocaleDateString()}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <Button variant="ghost" size="icon">
-                                    <ThumbsUp className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                                <p className="whitespace-pre-line">{reply.content}</p>
-                              </div>
-                            ))}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-lg text-gray-500">Nenhum comentário ou dúvida ainda. Seja o primeiro a comentar!</p>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <p className="text-center py-8 text-muted-foreground">
+                        Nenhum comentário ainda. Seja o primeiro a comentar!
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-lg text-gray-500">Seja o primeiro a comentar!</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
 
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Aulas relacionadas</CardTitle>
-                <CardDescription>Outras aulas sobre o mesmo assunto</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* This would ideally be populated by the API */}
-                <p className="text-center text-sm text-gray-500 py-4">
-                  Carregando aulas relacionadas...
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Vídeos por categoria</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" className="text-sm" asChild>
-                    <Link href="/videos">
-                      Todos os vídeos
-                    </Link>
-                  </Button>
-                  <Button variant="outline" className="text-sm" asChild>
-                    <Link href={`/videos?subject=${video.subject}`}>
-                      {video.subject}
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Vídeos Relacionados</CardTitle>
+              <CardDescription>Mais sobre {video.subject}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" className="text-sm" asChild>
+                  <Link href="/videos">
+                    Todos os vídeos
+                  </Link>
+                </Button>
+                <Button variant="outline" className="text-sm" asChild>
+                  <Link href={`/videos?subject=${video.subject}`}>
+                    {video.subject}
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }
