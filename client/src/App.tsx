@@ -15,6 +15,9 @@ import VideoDetail from "@/pages/video-detail";
 import VideosFavorites from "@/pages/videos-favorites";
 import Artigos from "@/pages/artigos";
 import ArtigoDetail from "@/pages/artigo-detail";
+import Trilhas from "@/pages/trilhas";
+import TrilhaDetail from "@/pages/trilha-detail";
+import AulaDetail from "@/pages/aula-detail";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,6 +36,9 @@ function Router() {
         <Route path="/videos/favorites" component={VideosFavorites} />
         <Route path="/artigos" component={Artigos} />
         <Route path="/artigos/:id" component={ArtigoDetail} />
+        <Route path="/trilhas" component={Trilhas} />
+        <Route path="/trilhas/:id" component={TrilhaDetail} />
+        <Route path="/aula/:id" component={AulaDetail} />
         
         {/* Fallback to 404 */}
         <Route component={NotFound} />

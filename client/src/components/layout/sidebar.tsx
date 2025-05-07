@@ -7,7 +7,9 @@ import {
   HelpCircle,
   Book,
   MapPin,
-  Box
+  Box,
+  Video,
+  FileText
 } from "lucide-react";
 
 const subjectColors: Record<string, { dot: string, hover: string, text: string }> = {
@@ -31,6 +33,8 @@ const mainNavItems = [
   { label: "Meu Desempenho", href: "/desempenho", icon: LineChart },
   { label: "Questões", href: "/questoes", icon: HelpCircle },
   { label: "Disciplinas", href: "/disciplinas", icon: Book },
+  { label: "Vídeo-aulas", href: "/videos", icon: Video },
+  { label: "Artigos", href: "/artigos", icon: FileText },
   { label: "Trilhas de Aprendizado", href: "/trilhas", icon: MapPin },
 ];
 

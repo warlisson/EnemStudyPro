@@ -110,35 +110,63 @@ export default function Videos() {
                                 <Play className="h-6 w-6 text-primary fill-current" />
                               </div>
                             </div>
+                            
+                            {/* Duration overlay */}
+                            <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                              {formatDuration(video.duration)}
+                            </div>
+                            
+                            {/* Level badge overlay */}
+                            <div className="absolute top-2 left-2">
+                              <Badge className={getDifficultyColor(video.level)}>
+                                {getDifficultyText(video.level)}
+                              </Badge>
+                            </div>
                           </div>
                           <CardHeader className="pb-2">
-                            <CardTitle className="text-lg line-clamp-2">{video.title}</CardTitle>
-                            <CardDescription className="flex items-center">
-                              {video.professor}
+                            <div className="flex justify-between items-start">
+                              <CardTitle className="text-lg line-clamp-2">{video.title}</CardTitle>
+                              {video.averageRating > 0 && (
+                                <Badge variant="outline" className="flex items-center space-x-1 bg-amber-100 text-amber-800 hover:bg-amber-100 ml-2 flex-shrink-0">
+                                  <Star className="h-3 w-3 fill-current" />
+                                  <span>{video.averageRating.toFixed(1)}</span>
+                                </Badge>
+                              )}
+                            </div>
+                            <CardDescription className="flex items-center mt-1">
+                              <div className="flex items-center">
+                                <div className="h-6 w-6 rounded-full bg-gray-200 text-xs flex items-center justify-center mr-2">
+                                  {video.professor ? video.professor.charAt(0) : 'P'}
+                                </div>
+                                <span>Prof. {video.professor}</span>
+                              </div>
                             </CardDescription>
                           </CardHeader>
                           <CardContent className="flex-grow">
-                            <p className="text-sm text-gray-500 line-clamp-2">{video.description}</p>
+                            <p className="text-sm text-gray-600 line-clamp-3 mb-2">{video.description}</p>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              <Badge variant="outline" className="bg-blue-50">{video.subject}</Badge>
+                              {video.topics && Array.isArray(video.topics) && video.topics.length > 0 && (
+                                <Badge variant="outline" className="bg-gray-50">{video.topics[0]}</Badge>
+                              )}
+                            </div>
                           </CardContent>
                           <CardFooter className="border-t pt-4 flex justify-between">
-                            <div className="flex items-center space-x-4">
-                              <Badge variant="outline" className="flex items-center space-x-1">
-                                <Clock className="h-3 w-3" />
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <div className="flex items-center">
+                                <Clock className="h-3 w-3 mr-1" />
                                 <span>{formatDuration(video.duration)}</span>
-                              </Badge>
-                              
-                              <Badge variant="outline" className={`flex items-center space-x-1 ${getDifficultyColor(video.level)}`}>
-                                <BookOpen className="h-3 w-3" />
-                                <span>{getDifficultyText(video.level)}</span>
-                              </Badge>
+                              </div>
+                              <span>•</span>
+                              <div className="flex items-center">
+                                <BookOpen className="h-3 w-3 mr-1" />
+                                <span>{video.viewCount || 0} visualizações</span>
+                              </div>
                             </div>
                             
-                            {video.averageRating > 0 && (
-                              <Badge variant="outline" className="flex items-center space-x-1 bg-amber-100 text-amber-800 hover:bg-amber-100">
-                                <Star className="h-3 w-3 fill-current" />
-                                <span>{video.averageRating.toFixed(1)}</span>
-                              </Badge>
-                            )}
+                            <Badge variant="secondary" className="text-xs">
+                              Ver aula
+                            </Badge>
                           </CardFooter>
                         </Card>
                     </Link>
