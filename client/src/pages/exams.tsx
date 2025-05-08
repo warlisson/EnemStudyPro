@@ -291,7 +291,7 @@ export default function Exams() {
     isLoading: isLoadingAttempts,
     error: attemptsError 
   } = useQuery({
-    queryKey: ['/api/exams/attempts'],
+    queryKey: ['/api/exams/attempts/completed'],
     enabled: true
   });
   

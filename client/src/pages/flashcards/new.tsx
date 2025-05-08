@@ -103,10 +103,7 @@ export default function NewFlashCard() {
         imageUrl: data.imageUrl || null,
       };
       
-      return apiRequest("/api/flashcards", {
-        method: "POST",
-        body: flashCardData,
-      });
+      return apiRequest("POST", "/api/flashcards", flashCardData);
     },
     onSuccess: (data) => {
       // Atualizar a cache

@@ -230,7 +230,7 @@ const ReplyItem = ({ reply }: { reply: ThreadReply }) => {
           <div className="flex items-center space-x-2">
             <CardTitle className="text-sm">
               {reply.isAnswer && (
-                <Badge variant="success" className="mr-2">Resposta Aceita</Badge>
+                <Badge variant="default" className="mr-2 bg-green-600">Resposta Aceita</Badge>
               )}
             </CardTitle>
           </div>
@@ -383,10 +383,7 @@ export default function ThreadDetail() {
         content,
       };
       
-      return apiRequest(`/api/threads/${params?.id}/replies`, {
-        method: "POST",
-        body: replyData,
-      });
+      return apiRequest("POST", `/api/threads/${params?.id}/replies`, replyData);
     },
     onSuccess: () => {
       // Limpar o campo de resposta
