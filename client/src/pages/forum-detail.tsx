@@ -163,7 +163,7 @@ export default function ForumDetail() {
   
   // Obter detalhes do fórum
   const { 
-    data: forum,
+    data: forum = { id: 0, title: "", description: null, threadCount: 0, postCount: 0, tags: [] },
     isLoading: isLoadingForum,
     error: forumError
   } = useQuery({
@@ -293,7 +293,7 @@ export default function ForumDetail() {
             </Button>
             <PageTitle 
               title={forum.title} 
-              description={forum.description}
+              description={forum.description || ""}
               icon={<MessageSquare className="h-6 w-6" />}
             />
           </div>

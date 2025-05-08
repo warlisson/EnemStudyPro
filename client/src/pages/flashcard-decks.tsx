@@ -151,7 +151,7 @@ export default function FlashCardDecks() {
       switch (sortBy) {
         case "recent":
           // Ordenar pelo mais recente
-          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+          return new Date(b.createdAt || Date.now()).getTime() - new Date(a.createdAt || Date.now()).getTime();
         case "name":
           // Ordenar por nome
           return a.name.localeCompare(b.name);
