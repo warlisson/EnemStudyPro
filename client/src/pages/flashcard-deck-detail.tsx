@@ -185,9 +185,7 @@ export default function FlashCardDeckDetail() {
   // Mutação para excluir o deck
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest(`/api/flashcarddecks/${params?.id}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `/api/flashcarddecks/${params?.id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/flashcarddecks'] });
@@ -209,9 +207,7 @@ export default function FlashCardDeckDetail() {
   // Mutação para clonar o deck
   const cloneMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest(`/api/flashcarddecks/${params?.id}/clone`, {
-        method: "POST",
-      });
+      return apiRequest("POST", `/api/flashcarddecks/${params?.id}/clone`);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/flashcarddecks'] });

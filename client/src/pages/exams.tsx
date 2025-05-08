@@ -234,12 +234,11 @@ const AttemptItem = ({ attempt, exam }: { attempt: ExamAttempt; exam: Exam }) =>
                 <span className="text-xs text-muted-foreground">Resultado:</span>
                 <Progress 
                   value={attempt.score || 0} 
-                  className="h-2" 
-                  indicatorClassName={
+                  className={`h-2 ${
                     (attempt.score || 0) >= (exam.passingScore || 0) 
                       ? "bg-green-600" 
                       : "bg-red-600"
-                  }
+                  }`}
                 />
                 <span className="text-xs font-medium">{attempt.score || 0}%</span>
               </div>
