@@ -60,8 +60,27 @@ export default function Home() {
     queryKey: ['/api/performance'],
   });
   
+  // Interface para os threads do fórum
+  interface ForumThread {
+    id: number;
+    title: string;
+    content: string;
+    userId: number;
+    userName: string;
+    userAvatar?: string;
+    forumId: number;
+    forumName: string;
+    replyCount: number;
+    viewCount: number;
+    createdAt: string;
+    isUrgent?: boolean;
+    isPinned?: boolean;
+    isLocked?: boolean;
+    tags: string[];
+  }
+  
   // Fetch recent forum threads
-  const { data: recentThreads = [], isLoading: loadingThreads } = useQuery({
+  const { data: recentThreads = [] as ForumThread[], isLoading: loadingThreads } = useQuery<ForumThread[]>({
     queryKey: ['/api/forums/threads/recent'],
   });
 
@@ -495,7 +514,7 @@ export default function Home() {
             </Card>
           ) : (
             <>
-              {recentThreads.slice(0, 4).map((thread: any) => (
+              {recentThreads.slice(0, 4).map((thread) => (
                 <Card key={thread.id} className="overflow-hidden">
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
