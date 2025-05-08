@@ -35,6 +35,12 @@ import Forums from "@/pages/forums";
 import ForumDetail from "@/pages/forum-detail";
 import ThreadDetail from "@/pages/thread-detail";
 
+// Novas páginas para Perfil, Planos, Calendário e Central do Aluno
+import Perfil from "@/pages/perfil";
+import Planos from "@/pages/planos";
+import Calendario from "@/pages/calendario";
+import CentralAluno from "@/pages/central-aluno";
+
 function Router() {
   return (
     <MainLayout>
@@ -75,6 +81,13 @@ function Router() {
         <Route path="/forums" component={Forums} />
         <Route path="/forum/:id" component={ForumDetail} />
         <Route path="/thread/:id" component={ThreadDetail} />
+        
+        {/* Novas rotas para Perfil, Planos, Calendário e Central do Aluno */}
+        <Route path="/perfil" component={Perfil} />
+        <Route path="/planos" component={Planos} />
+        <Route path="/calendario" component={Calendario} />
+        <Route path="/central-aluno" component={CentralAluno} />
+        <Route path="/checkout" component={Planos} />
         
         {/* Fallback to 404 */}
         <Route component={NotFound} />

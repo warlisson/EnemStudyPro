@@ -15,10 +15,29 @@ import {
   Atom, 
   FlaskRound, 
   Leaf,
-  Box
+  Box,
+  MessageSquare,
+  Award,
+  Trophy,
+  LucideIcon,
+  Star,
+  BookOpen,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 
 export default function Home() {
   // Fetch user data
@@ -39,6 +58,11 @@ export default function Home() {
   // Fetch performance data
   const { data: performanceData, isLoading: loadingPerformance } = useQuery({
     queryKey: ['/api/performance'],
+  });
+  
+  // Fetch recent forum threads
+  const { data: recentThreads = [], isLoading: loadingThreads } = useQuery({
+    queryKey: ['/api/forums/threads/recent'],
   });
 
   // Dummy data for demonstration
@@ -298,6 +322,237 @@ export default function Home() {
               />
             );
           })}
+        </div>
+      </div>
+
+      {/* Gamification & Level System */}
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-neutral-800">Sistema de Experiência</h2>
+          <Link href="/perfil">
+            <div className="text-primary hover:text-primary-700 text-sm font-medium flex items-center cursor-pointer">
+              Ver perfil
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </div>
+          </Link>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="col-span-1">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center justify-between">
+                <span>Nível Atual</span>
+                <Badge className="bg-primary text-white">Nível 8</Badge>
+              </CardTitle>
+              <CardDescription>
+                Continue estudando para avançar!
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center py-4">
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-full border-8 border-primary/20 flex items-center justify-center">
+                    <span className="text-4xl font-bold text-primary">8</span>
+                  </div>
+                  
+                  <div className="absolute -top-1 -right-1 bg-primary text-white rounded-full p-2 shadow-lg">
+                    <Trophy className="h-6 w-6" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2 mt-4">
+                <div className="flex justify-between text-sm">
+                  <span>Progresso para Nível 9</span>
+                  <span className="font-medium">65%</span>
+                </div>
+                <Progress className="h-2" value={65} />
+                <p className="text-xs text-muted-foreground text-center mt-1">
+                  850 XP / 1300 XP necessários
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter className="border-t pt-4">
+              <Button variant="outline" className="w-full" asChild>
+                <Link href="/perfil">
+                  <Award className="mr-2 h-4 w-4" />
+                  Ver conquistas
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
+          
+          <Card className="col-span-1 md:col-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Ganhe XP com atividades</CardTitle>
+              <CardDescription>
+                Quanto mais você estuda, mais experiência ganha!
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-primary/5 rounded-lg text-center">
+                    <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <BookOpen className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-sm font-medium">Artigos</h3>
+                    <p className="text-xs text-muted-foreground">+15 XP por leitura</p>
+                  </div>
+                  
+                  <div className="p-4 bg-primary/5 rounded-lg text-center">
+                    <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <MessageSquare className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-sm font-medium">Fóruns</h3>
+                    <p className="text-xs text-muted-foreground">+20 XP por resposta</p>
+                  </div>
+                  
+                  <div className="p-4 bg-primary/5 rounded-lg text-center">
+                    <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Star className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-sm font-medium">Simulados</h3>
+                    <p className="text-xs text-muted-foreground">+50 XP por simulado</p>
+                  </div>
+                </div>
+                
+                <h3 className="text-sm font-medium mt-4">Atividades recentes</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 rounded-md bg-green-50">
+                    <div className="flex items-center">
+                      <div className="bg-green-100 p-2 rounded-full mr-3">
+                        <BookOpen className="h-4 w-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Artigo completado</p>
+                        <p className="text-xs text-muted-foreground">Hereditariedade: o que é, conceitos importantes...</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-600">+15 XP</Badge>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-2 rounded-md bg-blue-50">
+                    <div className="flex items-center">
+                      <div className="bg-blue-100 p-2 rounded-full mr-3">
+                        <MessageSquare className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Resposta no fórum</p>
+                        <p className="text-xs text-muted-foreground">Como calcular o produto notável (x+y)²?</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-blue-600">+20 XP</Badge>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-2 rounded-md bg-primary/5">
+                    <div className="flex items-center">
+                      <div className="bg-primary/10 p-2 rounded-full mr-3">
+                        <Users className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Streak de estudos</p>
+                        <p className="text-xs text-muted-foreground">8 dias consecutivos de estudos</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-primary">+40 XP</Badge>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      
+      {/* Latest Community Questions */}
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-neutral-800">Perguntas da Comunidade</h2>
+          <Link href="/forums">
+            <div className="text-primary hover:text-primary-700 text-sm font-medium flex items-center cursor-pointer">
+              Ver fóruns
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </div>
+          </Link>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {recentThreads.length === 0 ? (
+            <Card className="col-span-1 md:col-span-2">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Nenhuma pergunta recente</h3>
+                <p className="text-muted-foreground text-center max-w-md mb-4">
+                  Seja o primeiro a perguntar e ganhar pontos ajudando a comunidade.
+                </p>
+                <Button asChild>
+                  <Link href="/forums">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Criar tópico no fórum
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {recentThreads.slice(0, 4).map((thread: any) => (
+                <Card key={thread.id} className="overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center space-x-2 mb-1">
+                          <Badge variant="outline">{thread.forumName}</Badge>
+                          {thread.isUrgent && (
+                            <Badge variant="destructive">Urgente</Badge>
+                          )}
+                        </div>
+                        <CardTitle className="text-base">
+                          <Link href={`/thread/${thread.id}`} className="hover:text-primary transition-colors">
+                            {thread.title}
+                          </Link>
+                        </CardTitle>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {thread.content}
+                    </p>
+                  </CardContent>
+                  <CardFooter className="text-xs text-muted-foreground border-t pt-3 flex justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center">
+                        <Avatar className="h-6 w-6 mr-2">
+                          <AvatarFallback>{thread.userName?.slice(0, 2).toUpperCase() || "U"}</AvatarFallback>
+                        </Avatar>
+                        <span>{thread.userName}</span>
+                      </div>
+                      <span>{new Date(thread.createdAt).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="flex items-center">
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        {thread.replyCount || 0}
+                      </span>
+                      <span className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          className="h-3 w-3 mr-1">
+                          <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                        </svg>
+                        {thread.voteCount || 0}
+                      </span>
+                    </div>
+                  </CardFooter>
+                </Card>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
