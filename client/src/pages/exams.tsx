@@ -276,30 +276,30 @@ export default function Exams() {
   
   // Buscar exames disponíveis
   const { 
-    data: exams = [],
+    data: exams = [] as Exam[],
     isLoading: isLoadingExams,
     error: examsError 
-  } = useQuery({
+  } = useQuery<Exam[]>({
     queryKey: ['/api/exams'],
     enabled: true
   });
 
   // Buscar tentativas de exames do usuário
   const { 
-    data: attempts = [],
+    data: attempts = [] as ExamAttempt[],
     isLoading: isLoadingAttempts,
     error: attemptsError 
-  } = useQuery({
+  } = useQuery<ExamAttempt[]>({
     queryKey: ['/api/exams/attempts/completed'],
     enabled: true
   });
   
   // Buscar exames em andamento
   const { 
-    data: inProgressExams = [],
+    data: inProgressExams = [] as ExamAttempt[],
     isLoading: isLoadingInProgress,
     error: inProgressError 
-  } = useQuery({
+  } = useQuery<ExamAttempt[]>({
     queryKey: ['/api/exams/attempts/in-progress'],
     enabled: true
   });

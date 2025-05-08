@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { 
@@ -71,15 +71,46 @@ export default function Profile() {
   
   // Buscar dados do perfil
   const { 
-    data: profile,
+    data: profile = {
+      id: 0,
+      username: '',
+      email: '',
+      fullName: '',
+      bio: '',
+      avatarUrl: '',
+      createdAt: '',
+      phoneNumber: '',
+      school: '',
+      targetExam: '',
+      state: '',
+      city: '',
+      birthDate: '',
+      xp: 0,
+      level: 0,
+      premium: false,
+      preferences: {
+        emailNotifications: true,
+        pushNotifications: true,
+        smsNotifications: false,
+        weeklyReports: true,
+        newContentAlerts: true,
+        studyReminders: true,
+        dueFlashcards: true,
+        recommendedMaterials: true,
+      }
+    } as ProfileData,
     isLoading,
     error 
   } = useQuery<ProfileData>({
-    queryKey: ['/api/users/me'],
-    onSuccess: (data) => {
-      setFormData(data);
-    }
+    queryKey: ['/api/users/me']
   });
+  
+  // Inicializar formData quando o perfil for carregado
+  useEffect(() => {
+    if (profile) {
+      setFormData(profile);
+    }
+  }, [profile]);
   
   // Mutação para atualizar o perfil
   const updateProfileMutation = useMutation({
