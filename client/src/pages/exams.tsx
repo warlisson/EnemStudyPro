@@ -433,7 +433,7 @@ export default function Exams() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {inProgressItems.map(({ attempt, exam }) => (
-                    <AttemptItem key={attempt.id} attempt={attempt} exam={exam} />
+                    <AttemptItem key={attempt.id} attempt={attempt} exam={exam as Exam} />
                   ))}
                 </div>
               )}
@@ -563,7 +563,7 @@ export default function Exams() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {attemptHistory.map(({ attempt, exam }) => (
-                  <AttemptItem key={attempt.id} attempt={attempt} exam={exam} />
+                  <AttemptItem key={attempt.id} attempt={attempt} exam={exam as Exam} />
                 ))}
               </div>
             )}

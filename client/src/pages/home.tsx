@@ -72,6 +72,7 @@ export default function Home() {
     forumName: string;
     replyCount: number;
     viewCount: number;
+    voteCount?: number;
     createdAt: string;
     isUrgent?: boolean;
     isPinned?: boolean;
