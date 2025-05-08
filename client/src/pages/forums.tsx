@@ -202,15 +202,17 @@ export default function Forums() {
   });
   
   // Filtrar e ordenar fóruns
-  const filteredForums = forums.filter((forum: Forum) => {
+  const filteredForums = Array.isArray(forums) ? forums.filter((forum: Forum) => {
+    if (!forum || typeof forum !== 'object') return false;
+    
     const matchesSearch = searchTerm === "" || 
-      forum.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (forum.title && forum.title.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (forum.description && forum.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesSubject = subjectFilter === "all" || forum.subject === subjectFilter;
     
     return matchesSearch && matchesSubject;
-  });
+  }) : [];
   
   // Ordenar fóruns
   const sortedForums = [...filteredForums].sort((a: Forum, b: Forum) => {
@@ -220,7 +222,7 @@ export default function Forums() {
         return new Date(b.lastActivityAt || 0).getTime() - new Date(a.lastActivityAt || 0).getTime();
       case "alphabetical":
         // Ordenar por ordem alfabética
-        return a.title.localeCompare(b.title);
+        return (a.title || '').localeCompare(b.title || '');
       case "threads":
         // Ordenar por número de tópicos
         return (b.threadCount || 0) - (a.threadCount || 0);
@@ -233,17 +235,21 @@ export default function Forums() {
   });
   
   // Filtrar e ordenar tópicos recentes
-  const filteredThreads = recentThreads.filter((thread: ForumThread) => {
+  const filteredThreads = Array.isArray(recentThreads) ? recentThreads.filter((thread: ForumThread) => {
+    if (!thread || typeof thread !== 'object') return false;
+    
     const matchesSearch = searchTerm === "" || 
-      thread.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      thread.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (thread.tags && thread.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+      (thread.title && thread.title.toLowerCase().includes(searchTerm.toLowerCase())) || 
+      (thread.content && thread.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (thread.tags && Array.isArray(thread.tags) && thread.tags.some(tag => 
+        tag && tag.toLowerCase().includes(searchTerm.toLowerCase())
+      ));
     
     const matchesSubject = subjectFilter === "all" || 
-      (thread.forumId && forums.find((f: Forum) => f.id === thread.forumId)?.subject === subjectFilter);
+      (thread.forumId && Array.isArray(forums) && forums.find((f: Forum) => f.id === thread.forumId)?.subject === subjectFilter);
     
     return matchesSearch && matchesSubject;
-  });
+  }) : [];
   
   // Ordenar tópicos
   const sortedThreads = [...filteredThreads].sort((a: ForumThread, b: ForumThread) => {

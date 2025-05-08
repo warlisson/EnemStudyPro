@@ -357,20 +357,37 @@ export default function ThreadDetail() {
   
   // Obter detalhes do tópico
   const { 
-    data: thread,
+    data: thread = {
+      id: 0,
+      title: '',
+      content: '',
+      forumId: 0,
+      forumTitle: '',
+      userId: 0,
+      userName: '',
+      replyCount: 0,
+      viewCount: 0,
+      isPinned: false,
+      isLocked: false,
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      postCount: 0,
+      lastReplyAt: null
+    } as ForumThread,
     isLoading: isLoadingThread,
     error: threadError 
-  } = useQuery({
+  } = useQuery<ForumThread>({
     queryKey: [`/api/threads/${params?.id}`],
     enabled: !!params?.id
   });
   
   // Obter respostas
   const { 
-    data: replies = [],
+    data: replies = [] as ThreadReply[],
     isLoading: isLoadingReplies,
     error: repliesError 
-  } = useQuery({
+  } = useQuery<ThreadReply[]>({
     queryKey: [`/api/threads/${params?.id}/replies`],
     enabled: !!params?.id
   });

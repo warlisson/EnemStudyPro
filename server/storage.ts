@@ -1,138 +1,145 @@
 import { 
-  users, type User, type InsertUser,
-  subjects, type Subject, type InsertSubject,
-  questions, type Question, type InsertQuestion,
-  studyMaterials, type StudyMaterial, type InsertStudyMaterial,
-  userPerformance, type UserPerformance, type InsertUserPerformance,
-  news, type News, type InsertNews,
-  videoLessons, type VideoLesson, type InsertVideoLesson,
-  videoProgress, type VideoProgress, type InsertVideoProgress,
-  videoRatings, type VideoRating, type InsertVideoRating,
-  videoComments, type VideoComment, type InsertVideoComment,
-  categories, type Category, type InsertCategory,
-  videoCategoryRelations, type VideoCategoryRelation, type InsertVideoCategoryRelation,
-  videoExercises, type VideoExercise, type InsertVideoExercise,
-  // Novos tipos para Flash Cards
-  flashCards, type FlashCard, type InsertFlashCard,
-  flashCardDecks, type FlashCardDeck, type InsertFlashCardDeck,
-  deckCards, type DeckCard, type InsertDeckCard,
-  // Novos tipos para Exames
-  exams, type Exam, type InsertExam,
-  examQuestions, type ExamQuestion, type InsertExamQuestion,
-  examAttempts, type ExamAttempt, type InsertExamAttempt,
-  // Novos tipos para Fóruns
-  forums, type Forum, type InsertForum,
-  forumThreads, type ForumThread, type InsertForumThread,
-  forumPosts, type ForumPost, type InsertForumPost,
-  type Json
-} from "@shared/schema";
+  User, InsertUser,
+  Subject, InsertSubject,
+  Question, InsertQuestion,
+  StudyMaterial, InsertStudyMaterial,
+  UserPerformance, InsertUserPerformance,
+  News, InsertNews,
+  VideoLesson, InsertVideoLesson,
+  VideoProgress, InsertVideoProgress,
+  VideoRating, InsertVideoRating,
+  VideoComment, InsertVideoComment,
+  Category, InsertCategory,
+  VideoCategoryRelation, InsertVideoCategoryRelation,
+  VideoExercise, InsertVideoExercise,
+  FlashCard, InsertFlashCard,
+  FlashCardDeck, InsertFlashCardDeck,
+  DeckCard, InsertDeckCard,
+  Exam, InsertExam, 
+  ExamQuestion, InsertExamQuestion,
+  ExamAttempt, InsertExamAttempt,
+  Forum, InsertForum,
+  ForumThread, InsertForumThread,
+  ForumPost, InsertForumPost
+} from "../shared/schema";
 
-// Storage interface
-export interface IStorage {
+// Interface para o Storage
+interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, userData: Partial<InsertUser>): Promise<User>;
+  getAllUsers(): Promise<User[]>;
   
   // Subjects
   getAllSubjects(): Promise<Subject[]>;
-  getSubjectByCode(code: string): Promise<Subject | undefined>;
-  getSubjectDetails(code: string): Promise<any>;
+  getSubjectById(id: number): Promise<Subject | undefined>;
   createSubject(subject: InsertSubject): Promise<Subject>;
+  updateSubject(id: number, data: Partial<InsertSubject>): Promise<Subject>;
   
   // Questions
   getAllQuestions(): Promise<Question[]>;
-  getQuestionsBySubject(subject: string): Promise<Question[]>;
   getQuestionById(id: number): Promise<Question | undefined>;
+  getQuestionsBySubject(subjectId: number): Promise<Question[]>;
   createQuestion(question: InsertQuestion): Promise<Question>;
+  updateQuestion(id: number, data: Partial<InsertQuestion>): Promise<Question>;
   
   // Study Materials
-  getAllMaterials(): Promise<StudyMaterial[]>;
-  getRecentMaterials(): Promise<StudyMaterial[]>;
-  getMaterialsBySubject(subject: string): Promise<StudyMaterial[]>;
-  getMaterialById(id: number): Promise<StudyMaterial | undefined>;
-  createMaterial(material: InsertStudyMaterial): Promise<StudyMaterial>;
+  getAllStudyMaterials(): Promise<StudyMaterial[]>;
+  getStudyMaterialById(id: number): Promise<StudyMaterial | undefined>;
+  getStudyMaterialsBySubject(subjectId: number): Promise<StudyMaterial[]>;
+  createStudyMaterial(material: InsertStudyMaterial): Promise<StudyMaterial>;
+  updateStudyMaterial(id: number, data: Partial<InsertStudyMaterial>): Promise<StudyMaterial>;
+  getRecentStudyMaterials(limit?: number): Promise<StudyMaterial[]>;
   
   // User Performance
-  getUserPerformance(): Promise<any>;
-  getUserPerformanceBySubject(subject: string): Promise<any>;
-  addUserPerformance(performance: InsertUserPerformance): Promise<UserPerformance>;
+  getUserPerformance(userId: number): Promise<UserPerformance | undefined>;
+  createUserPerformance(performance: InsertUserPerformance): Promise<UserPerformance>;
+  updateUserPerformance(userId: number, data: Partial<InsertUserPerformance>): Promise<UserPerformance>;
+  getUserStatistics(userId: number): Promise<any>;
   
   // News
-  getNews(): Promise<News[]>;
+  getAllNews(): Promise<News[]>;
   getNewsById(id: number): Promise<News | undefined>;
-  createNews(newsItem: InsertNews): Promise<News>;
+  createNews(news: InsertNews): Promise<News>;
+  updateNews(id: number, data: Partial<InsertNews>): Promise<News>;
+  getRecentNews(limit?: number): Promise<News[]>;
   
   // Video Lessons
   getAllVideoLessons(): Promise<VideoLesson[]>;
-  getVideoLessonsBySubject(subject: string): Promise<VideoLesson[]>;
-  getVideoLessonsByCategory(categoryId: number): Promise<VideoLesson[]>;
-  getRecentVideoLessons(limit?: number): Promise<VideoLesson[]>;
   getVideoLessonById(id: number): Promise<VideoLesson | undefined>;
-  createVideoLesson(videoLesson: InsertVideoLesson): Promise<VideoLesson>;
-  incrementVideoViews(id: number): Promise<void>;
+  getVideoLessonsBySubject(subjectId: number): Promise<VideoLesson[]>;
+  getVideoLessonsByCategory(categoryId: number): Promise<VideoLesson[]>;
+  createVideoLesson(video: InsertVideoLesson): Promise<VideoLesson>;
+  updateVideoLesson(id: number, data: Partial<InsertVideoLesson>): Promise<VideoLesson>;
+  getPopularVideoLessons(limit?: number): Promise<VideoLesson[]>;
+  getRecentVideoLessons(limit?: number): Promise<VideoLesson[]>;
+  getFavoriteVideoLessons(userId: number): Promise<VideoLesson[]>;
   
   // Video Progress
   getVideoProgress(userId: number, videoId: number): Promise<VideoProgress | undefined>;
-  updateVideoProgress(userId: number, videoId: number, progress: number): Promise<VideoProgress>;
-  setVideoWatched(userId: number, videoId: number, watched: boolean): Promise<VideoProgress>;
-  toggleVideoFavorite(userId: number, videoId: number): Promise<VideoProgress>;
-  getFavoriteVideos(userId: number): Promise<VideoLesson[]>;
-  getWatchedVideos(userId: number): Promise<VideoLesson[]>;
+  createVideoProgress(progress: InsertVideoProgress): Promise<VideoProgress>;
+  updateVideoProgress(userId: number, videoId: number, data: Partial<InsertVideoProgress>): Promise<VideoProgress>;
+  getUserVideoProgresses(userId: number): Promise<VideoProgress[]>;
   
-  // Video Ratings and Comments
+  // Video Ratings
+  getVideoRating(userId: number, videoId: number): Promise<VideoRating | undefined>;
+  createVideoRating(rating: InsertVideoRating): Promise<VideoRating>;
+  updateVideoRating(userId: number, videoId: number, data: Partial<InsertVideoRating>): Promise<VideoRating>;
   getVideoRatings(videoId: number): Promise<VideoRating[]>;
-  addVideoRating(rating: InsertVideoRating): Promise<VideoRating>;
-  getAverageVideoRating(videoId: number): Promise<number>;
+  
+  // Video Comments
   getVideoComments(videoId: number): Promise<VideoComment[]>;
-  addVideoComment(comment: InsertVideoComment): Promise<VideoComment>;
+  getVideoCommentById(id: number): Promise<VideoComment | undefined>;
+  createVideoComment(comment: InsertVideoComment): Promise<VideoComment>;
+  updateVideoComment(id: number, data: Partial<InsertVideoComment>): Promise<VideoComment>;
+  deleteVideoComment(id: number): Promise<boolean>;
   
   // Categories
   getAllCategories(): Promise<Category[]>;
-  getCategoriesBySubject(subject: string): Promise<Category[]>;
   getCategoryById(id: number): Promise<Category | undefined>;
   createCategory(category: InsertCategory): Promise<Category>;
+  updateCategory(id: number, data: Partial<InsertCategory>): Promise<Category>;
+  
+  // Video Category Relations
+  createVideoCategoryRelation(relation: InsertVideoCategoryRelation): Promise<VideoCategoryRelation>;
+  getVideoCategoriesByVideo(videoId: number): Promise<Category[]>;
+  getVideosByCategory(categoryId: number): Promise<VideoLesson[]>;
   
   // Video Exercises
-  getVideoExercises(videoId: number): Promise<Question[]>;
-  addVideoExercise(videoExercise: InsertVideoExercise): Promise<VideoExercise>;
+  getVideoExercises(videoId: number): Promise<VideoExercise[]>;
+  getVideoExerciseById(id: number): Promise<VideoExercise | undefined>;
+  createVideoExercise(exercise: InsertVideoExercise): Promise<VideoExercise>;
+  updateVideoExercise(id: number, data: Partial<InsertVideoExercise>): Promise<VideoExercise>;
   
   // Flash Cards
-  getAllFlashCards(userId: number): Promise<FlashCard[]>;
-  getFlashCardsBySubject(userId: number, subject: string): Promise<FlashCard[]>;
+  getAllFlashCards(): Promise<FlashCard[]>;
   getFlashCardById(id: number): Promise<FlashCard | undefined>;
   createFlashCard(flashCard: InsertFlashCard): Promise<FlashCard>;
   updateFlashCard(id: number, data: Partial<InsertFlashCard>): Promise<FlashCard>;
-  deleteFlashCard(id: number): Promise<boolean>;
-  getDueFlashCards(userId: number, limit?: number): Promise<FlashCard[]>;
-  updateFlashCardReviewStatus(id: number, difficulty: number): Promise<FlashCard>;
+  getFlashCardsByDeck(deckId: number): Promise<FlashCard[]>;
   
   // Flash Card Decks
-  getAllFlashCardDecks(userId: number): Promise<FlashCardDeck[]>;
+  getAllFlashCardDecks(): Promise<FlashCardDeck[]>;
   getFlashCardDeckById(id: number): Promise<FlashCardDeck | undefined>;
   createFlashCardDeck(deck: InsertFlashCardDeck): Promise<FlashCardDeck>;
   updateFlashCardDeck(id: number, data: Partial<InsertFlashCardDeck>): Promise<FlashCardDeck>;
-  deleteFlashCardDeck(id: number): Promise<boolean>;
-  getFlashCardDecksBySubject(userId: number, subject: string): Promise<FlashCardDeck[]>;
+  getFlashCardDecksByUser(userId: number): Promise<FlashCardDeck[]>;
   getPublicFlashCardDecks(): Promise<FlashCardDeck[]>;
   
-  // Deck Cards (Relacionamento entre deck e cards)
-  addFlashCardToDeck(deckId: number, cardId: number, order?: number): Promise<DeckCard>;
-  removeFlashCardFromDeck(deckId: number, cardId: number): Promise<boolean>;
-  getFlashCardsFromDeck(deckId: number): Promise<FlashCard[]>;
-  reorderFlashCardInDeck(deckId: number, cardId: number, newOrder: number): Promise<boolean>;
+  // Deck Cards
+  addCardToDeck(deckId: number, cardId: number): Promise<DeckCard>;
+  removeCardFromDeck(deckId: number, cardId: number): Promise<boolean>;
   
   // Exams
   getAllExams(): Promise<Exam[]>;
   getExamById(id: number): Promise<Exam | undefined>;
   createExam(exam: InsertExam): Promise<Exam>;
   updateExam(id: number, data: Partial<InsertExam>): Promise<Exam>;
-  deleteExam(id: number): Promise<boolean>;
-  getExamsBySubject(subject: string): Promise<Exam[]>;
-  getPublicExams(): Promise<Exam[]>;
   
   // Exam Questions
-  addQuestionToExam(examQuestion: InsertExamQuestion): Promise<ExamQuestion>;
+  addQuestionToExam(examId: number, questionId: number, order?: number, points?: number): Promise<ExamQuestion>;
   removeQuestionFromExam(examId: number, questionId: number): Promise<boolean>;
   getQuestionsFromExam(examId: number): Promise<Question[]>;
   reorderQuestionInExam(examId: number, questionId: number, newOrder: number): Promise<boolean>;
@@ -166,817 +173,783 @@ export interface IStorage {
   getRecentPosts(limit?: number): Promise<ForumPost[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private subjects: Map<number, Subject>;
-  private questions: Map<number, Question>;
-  private studyMaterials: Map<number, StudyMaterial>;
-  private userPerformance: Map<number, UserPerformance>;
-  private news: Map<number, News>;
-  private videoLessons: Map<number, VideoLesson>;
-  private videoProgress: Map<number, VideoProgress>;
-  private videoRatings: Map<number, VideoRating>;
-  private videoComments: Map<number, VideoComment>;
-  private categories: Map<number, Category>;
-  private videoCategoryRelations: Map<number, VideoCategoryRelation>;
-  private videoExercises: Map<number, VideoExercise>;
+// Implementação em memória para desenvolvimento
+class MemStorage implements IStorage {
+  private users = new Map<number, User>();
+  private subjects = new Map<number, Subject>();
+  private questions = new Map<number, Question>();
+  private studyMaterials = new Map<number, StudyMaterial>();
+  private userPerformance = new Map<number, UserPerformance>();
+  private news = new Map<number, News>();
+  private videoLessons = new Map<number, VideoLesson>();
+  private videoProgress = new Map<string, VideoProgress>();
+  private videoRatings = new Map<string, VideoRating>();
+  private videoComments = new Map<number, VideoComment>();
+  private categories = new Map<number, Category>();
+  private videoCategoryRelations = new Map<number, VideoCategoryRelation>();
+  private videoExercises = new Map<number, VideoExercise>();
+  private flashCards = new Map<number, FlashCard>();
+  private flashCardDecks = new Map<number, FlashCardDeck>();
+  private deckCards = new Map<number, DeckCard>();
+  private exams = new Map<number, Exam>();
+  private examQuestions = new Map<number, ExamQuestion>();
+  private examAttempts = new Map<number, ExamAttempt>();
+  private forums = new Map<number, Forum>();
+  private forumThreads = new Map<number, ForumThread>();
+  private forumPosts = new Map<number, ForumPost>();
   
-  // Novos maps para Flash Cards
-  private flashCards: Map<number, FlashCard>;
-  private flashCardDecks: Map<number, FlashCardDeck>;
-  private deckCards: Map<number, DeckCard>;
+  private currentUserId = 2;
+  private currentSubjectId = 1;
+  private currentQuestionId = 1;
+  private currentStudyMaterialId = 1;
+  private currentNewsId = 1;
+  private currentVideoLessonId = 1;
+  private currentVideoCommentId = 1;
+  private currentCategoryId = 1;
+  private currentVideoCategoryRelationId = 1;
+  private currentVideoExerciseId = 1;
+  private currentFlashCardId = 1;
+  private currentFlashCardDeckId = 1;
+  private currentDeckCardId = 1;
+  private currentExamId = 1;
+  private currentExamQuestionId = 1;
+  private currentExamAttemptIds = 1;
+  private currentForumIds = 1;
+  private currentForumThreadIds = 1;
+  private currentForumPostIds = 1;
   
-  // Novos maps para Exams
-  private exams: Map<number, Exam>;
-  private examQuestions: Map<number, ExamQuestion>;
-  private examAttempts: Map<number, ExamAttempt>;
-  
-  // Novos maps para Forums
-  private forums: Map<number, Forum>;
-  private forumThreads: Map<number, ForumThread>;
-  private forumPosts: Map<number, ForumPost>;
-  
-  private currentUserIds: number;
-  private currentSubjectIds: number;
-  private currentQuestionIds: number;
-  private currentMaterialIds: number;
-  private currentPerformanceIds: number;
-  private currentNewsIds: number;
-  private currentVideoLessonIds: number;
-  private currentVideoProgressIds: number;
-  private currentVideoRatingIds: number;
-  private currentVideoCommentIds: number;
-  private currentCategoryIds: number;
-  private currentVideoCategoryRelationIds: number;
-  private currentVideoExerciseIds: number;
-  
-  // Novos IDs counters
-  private currentFlashCardIds: number = 1;
-  private currentFlashCardDeckIds: number = 1;
-  private currentDeckCardIds: number = 1;
-  private currentExamIds: number = 1;
-  private currentExamQuestionIds: number = 1;
-  private currentExamAttemptIds: number = 1;
-  private currentForumIds: number = 1;
-  private currentForumThreadIds: number = 1;
-  private currentForumPostIds: number = 1;
-
   constructor() {
-    this.users = new Map();
-    this.subjects = new Map();
-    this.questions = new Map();
-    this.studyMaterials = new Map();
-    this.userPerformance = new Map();
-    this.news = new Map();
-    this.videoLessons = new Map();
-    this.videoProgress = new Map();
-    this.videoRatings = new Map();
-    this.videoComments = new Map();
-    this.categories = new Map();
-    this.videoCategoryRelations = new Map();
-    this.videoExercises = new Map();
-    
-    // Inicialização dos novos maps
-    this.flashCards = new Map();
-    this.flashCardDecks = new Map();
-    this.deckCards = new Map();
-    this.exams = new Map();
-    this.examQuestions = new Map();
-    this.examAttempts = new Map();
-    this.forums = new Map();
-    this.forumThreads = new Map();
-    this.forumPosts = new Map();
-    
-    this.currentUserIds = 1;
-    this.currentSubjectIds = 1;
-    this.currentQuestionIds = 1;
-    this.currentMaterialIds = 1;
-    this.currentPerformanceIds = 1;
-    this.currentNewsIds = 1;
-    this.currentVideoLessonIds = 1;
-    this.currentVideoProgressIds = 1;
-    this.currentVideoRatingIds = 1;
-    this.currentVideoCommentIds = 1;
-    this.currentCategoryIds = 1;
-    this.currentVideoCategoryRelationIds = 1;
-    this.currentVideoExerciseIds = 1;
-    
-    // Initialize with some data
-    this.initializeData();
+    // Inicializar dados mockados para desenvolvimento
+    this.initializeMockData();
   }
   
-  private initializeData() {
-    // Add sample subjects
-    const subjectsData: InsertSubject[] = [
-      { code: "portugues", name: "Português", description: "Gramática, interpretação textual e linguística", icon: "book", color: "blue", questionCount: 1127 },
-      { code: "matematica", name: "Matemática", description: "Álgebra, geometria, estatística e funções", icon: "calculator", color: "green", questionCount: 1328 },
-      { code: "fisica", name: "Física", description: "Mecânica, termodinâmica, óptica e eletromagnetismo", icon: "atom", color: "yellow", questionCount: 832 },
-      { code: "quimica", name: "Química", description: "Química orgânica, inorgânica e físico-química", icon: "flask", color: "green", questionCount: 764 },
-      { code: "biologia", name: "Biologia", description: "Genética, ecologia, fisiologia e evolução", icon: "leaf", color: "green", questionCount: 892 },
-    ];
-    
-    subjectsData.forEach(subject => this.createSubject(subject));
-    
-    // Add sample questions
-    const questionsData: InsertQuestion[] = [
-      {
-        examYear: "ENEM 2023",
-        subject: "matematica",
-        content: "Um pintor pretende fazer uma reprodução do quadro Guernica em uma tela de dimensões 20 cm por 30 cm. A obra, de autoria do espanhol Pablo Picasso, é uma pintura com 3,5 m de altura e 7,8 m de comprimento. A reprodução a ser feita deverá preencher a maior área possível da tela, mantendo a proporção entre as dimensões da obra original.\n\nA escala que deve ser empregada para essa reprodução é:",
-        options: [
-          { id: "a", text: "1 : 12" },
-          { id: "b", text: "1 : 16" },
-          { id: "c", text: "1 : 21" },
-          { id: "d", text: "1 : 26" },
-          { id: "e", text: "1 : 35" }
-        ],
-        answer: "c",
-        explanation: "Para manter a proporção, precisamos encontrar a escala adequada. Temos 7,8m/3,5m = 2,23 (proporção original) e 30cm/20cm = 1,5 (proporção da tela). Calculando a escala para cada dimensão: 350cm/20cm = 17,5 e 780cm/30cm = 26. Como queremos preencher a maior área possível mantendo a proporção, devemos usar a menor escala: 1:21.",
-        hasStepByStep: true,
-        hasVideo: false,
-        difficulty: 3,
-        topics: ["geometria", "escala", "proporção"]
-      }
-    ];
-    
-    questionsData.forEach(question => this.createQuestion(question));
-    
-    // Add sample study materials
-    const materialsData: InsertStudyMaterial[] = [
-      {
-        title: "Hereditariedade: o que é, conceitos importantes e como cai no vestibular",
-        description: "Nossos olhos, nosso cabelo, a cor da nossa pele e nossa altura. O que tudo isso tem em comum? Todas estas características são herdadas...",
-        content: "Conteúdo completo sobre hereditariedade...",
-        subject: "biologia",
-        topics: ["genética", "hereditariedade", "leis de mendel"],
-        image: "https://images.unsplash.com/photo-1530210124550-912dc1381cb8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
-        readTime: 15
+  private initializeMockData() {
+    // Usuario inicial
+    this.users.set(1, {
+      id: 1,
+      username: "Warlisson Miranda",
+      email: "mock@example.com",
+      passwordHash: "hashed_password",
+      fullName: "Warlisson Miranda",
+      bio: "Estudante se preparando para o ENEM",
+      createdAt: new Date("2023-01-15"),
+      updatedAt: new Date("2023-04-20"),
+      avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+      isVerified: true,
+      preferences: {
+        darkMode: false,
+        emailNotifications: true,
+        pushNotifications: true
       },
-      {
-        title: "Equações do 2º grau: resolução passo a passo",
-        description: "Aprenda como resolver equações quadráticas utilizando a fórmula de Bhaskara e outros métodos práticos com diversos exemplos...",
-        content: "Conteúdo completo sobre equações do 2º grau...",
-        subject: "matematica",
-        topics: ["álgebra", "equações", "bhaskara"],
-        image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
-        readTime: 20
-      },
-      {
-        title: "Colocação pronominal: próclise, mesóclise e ênclise",
-        description: "Entenda quando utilizar cada tipo de colocação pronominal e quais são as regras que determinam o posicionamento dos pronomes oblíquos...",
-        content: "Conteúdo completo sobre colocação pronominal...",
-        subject: "portugues",
-        topics: ["gramática", "pronomes", "colocação pronominal"],
-        image: "https://images.unsplash.com/photo-1455894127589-22f75500213a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
-        readTime: 15
-      }
-    ];
-    
-    materialsData.forEach(material => this.createMaterial(material));
-    
-    // Add sample news
-    const newsData: InsertNews[] = [
-      {
-        title: "Novas questões de matemática disponíveis",
-        description: "Adicionamos mais de 200 novas questões de matemática para você praticar",
-        content: "Conteúdo completo da notícia...",
-        category: "Atualização",
-        image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400"
-      },
-      {
-        title: "Dicas para se preparar para o ENEM",
-        description: "Confira nossas dicas para otimizar seus estudos a 3 meses do exame",
-        content: "Conteúdo completo da notícia...",
-        category: "Dicas de Estudo",
-        image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400"
-      }
-    ];
-    
-    newsData.forEach(newsItem => this.createNews(newsItem));
-    
-    // Add sample categories
-    const categoriesData: InsertCategory[] = [
-      {
-        name: "Revisão para o ENEM",
-        description: "Aulas de revisão com foco no ENEM",
-        icon: "graduationCap",
-        color: "#3b82f6",
-        subject: null
-      },
-      {
-        name: "Exercícios Resolvidos",
-        description: "Aulas com resolução passo a passo de exercícios",
-        icon: "pencil",
-        color: "#22c55e",
-        subject: null
-      },
-      {
-        name: "Gramática",
-        description: "Aulas sobre regras gramaticais e escrita",
-        icon: "book",
-        color: "#3b82f6",
-        subject: "portugues"
-      },
-      {
-        name: "Álgebra",
-        description: "Aulas sobre equações, funções e polinômios",
-        icon: "calculator",
-        color: "#22c55e",
-        subject: "matematica"
-      },
-      {
-        name: "Eletromagnetismo",
-        description: "Aulas sobre eletricidade e magnetismo",
-        icon: "atom",
-        color: "#eab308",
-        subject: "fisica"
-      }
-    ];
-    
-    const createdCategories = Promise.all(categoriesData.map(category => this.createCategory(category)));
-    
-    // Add sample video lessons
-    const videoLessonsData: InsertVideoLesson[] = [
-      {
-        title: "Equações do 2º Grau - Teoria e Fórmula de Bhaskara",
-        description: "Nesta aula, vamos aprender sobre equações do segundo grau: como identificá-las, o que significa cada termo e como aplicar a fórmula de Bhaskara para encontrar suas raízes.",
-        videoUrl: "https://www.youtube.com/watch?v=example1",
-        thumbnailUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
-        subject: "matematica",
-        professor: "Ricardo Oliveira",
-        duration: 1800, // 30 minutos
-        level: 1, // Básico
-        orderInSeries: 1,
-        seriesId: 1,
-        topics: ["álgebra", "equações", "bhaskara"],
-        attachments: [
-          { name: "Apostila de Equações", url: "https://example.com/apostila.pdf" },
-          { name: "Lista de Exercícios", url: "https://example.com/exercicios.pdf" }
-        ]
-      },
-      {
-        title: "Resolução de Equações do 2º Grau - Exercícios Comentados",
-        description: "Nesta aula, vamos resolver diversos exercícios de equações do segundo grau, desde os mais simples até problemas mais complexos que caem em vestibulares.",
-        videoUrl: "https://www.youtube.com/watch?v=example2",
-        thumbnailUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
-        subject: "matematica",
-        professor: "Ricardo Oliveira",
-        duration: 2400, // 40 minutos
-        level: 2, // Intermediário
-        orderInSeries: 2,
-        seriesId: 1,
-        topics: ["álgebra", "equações", "bhaskara", "problemas"],
-        attachments: [
-          { name: "Lista de Exercícios Resolvidos", url: "https://example.com/exercicios-resolvidos.pdf" }
-        ]
-      },
-      {
-        title: "Análise Sintática - Sujeito e Predicado",
-        description: "Nesta aula, vamos aprender sobre a estrutura básica das orações em português, identificando os diferentes tipos de sujeito e predicado.",
-        videoUrl: "https://www.youtube.com/watch?v=example3",
-        thumbnailUrl: "https://images.unsplash.com/photo-1455894127589-22f75500213a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
-        subject: "portugues",
-        professor: "Ana Paula Silva",
-        duration: 1500, // 25 minutos
-        level: 1, // Básico
-        orderInSeries: 1,
-        seriesId: 2,
-        topics: ["gramática", "análise sintática", "sujeito", "predicado"],
-        attachments: [
-          { name: "Resumo de Análise Sintática", url: "https://example.com/resumo.pdf" }
-        ]
-      },
-      {
-        title: "Leis de Newton - Força e Movimento",
-        description: "Nesta aula, vamos estudar as três leis de Newton que fundamentam a mecânica clássica, com exemplos práticos e aplicações.",
-        videoUrl: "https://www.youtube.com/watch?v=example4",
-        thumbnailUrl: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
-        subject: "fisica",
-        professor: "Carlos Mendes",
-        duration: 2700, // 45 minutos
-        level: 2, // Intermediário
-        orderInSeries: null,
-        seriesId: null,
-        topics: ["mecânica", "leis de newton", "força", "movimento"],
-        attachments: [
-          { name: "Formulário de Mecânica", url: "https://example.com/formulario.pdf" },
-          { name: "Simulações Interativas", url: "https://example.com/simulacoes.html" }
-        ]
-      },
-      {
-        title: "Genética Mendeliana - Primeira e Segunda Lei de Mendel",
-        description: "Nesta aula, vamos entender os princípios da hereditariedade descobertos por Gregor Mendel, estudando a lei da segregação e a lei da segregação independente.",
-        videoUrl: "https://www.youtube.com/watch?v=example5",
-        thumbnailUrl: "https://images.unsplash.com/photo-1530210124550-912dc1381cb8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400",
-        subject: "biologia",
-        professor: "Marina Costa",
-        duration: 3000, // 50 minutos
-        level: 3, // Avançado
-        orderInSeries: null,
-        seriesId: null,
-        topics: ["genética", "mendel", "hereditariedade", "alelos"],
-        attachments: [
-          { name: "Quadro de Cruzamentos", url: "https://example.com/cruzamentos.pdf" }
-        ]
-      }
-    ];
-    
-    videoLessonsData.forEach(async (videoLesson) => {
-      const video = await this.createVideoLesson(videoLesson);
-      
-      // Associar vídeos às categorias
-      if (video.subject === "matematica") {
-        const algebraCategory = await this.getCategoriesBySubject("matematica").then(cats => cats[0]);
-        if (algebraCategory) {
-          await this.addVideoCategoryRelation({
-            videoId: video.id,
-            categoryId: algebraCategory.id
-          });
-        }
-        
-        if (video.title.includes("Exercícios")) {
-          const exercisesCategory = (await this.getAllCategories())[1]; // "Exercícios Resolvidos"
-          if (exercisesCategory) {
-            await this.addVideoCategoryRelation({
-              videoId: video.id,
-              categoryId: exercisesCategory.id
-            });
-          }
-        }
-      } else if (video.subject === "portugues") {
-        const grammarCategory = await this.getCategoriesBySubject("portugues").then(cats => cats[0]);
-        if (grammarCategory) {
-          await this.addVideoCategoryRelation({
-            videoId: video.id,
-            categoryId: grammarCategory.id
-          });
-        }
-      } else if (video.subject === "fisica") {
-        const physicsCategory = await this.getCategoriesBySubject("fisica").then(cats => cats[0]);
-        if (physicsCategory) {
-          await this.addVideoCategoryRelation({
-            videoId: video.id,
-            categoryId: physicsCategory.id
-          });
-        }
-      }
-      
-      // Adicionar à categoria de revisão ENEM para todos os vídeos
-      const enemCategory = (await this.getAllCategories())[0]; // "Revisão para o ENEM"
-      if (enemCategory) {
-        await this.addVideoCategoryRelation({
-          videoId: video.id,
-          categoryId: enemCategory.id
-        });
-      }
+      level: 12,
+      xp: 3450,
+      premium: true
     });
     
-    // Adicionar alguns comentários de exemplo
-    setTimeout(async () => {
-      const videos = await this.getAllVideoLessons();
-      if (videos.length > 0) {
-        const firstVideo = videos[0];
-        
-        this.addVideoComment({
-          userId: 1,
-          videoId: firstVideo.id,
-          content: "Ótima explicação! Muito mais fácil de entender do que no meu colégio.",
-          parentId: null,
-          isQuestion: false,
-          isProfessorResponse: false
-        });
-        
-        this.addVideoComment({
-          userId: 1,
-          videoId: firstVideo.id,
-          content: "Tenho uma dúvida: o delta pode ser negativo? E se for, o que significa?",
-          parentId: null,
-          isQuestion: true,
-          isProfessorResponse: false
-        }).then(comment => {
-          this.addVideoComment({
-            userId: 1,
-            videoId: firstVideo.id,
-            content: "Ótima pergunta! Quando o delta é negativo, a equação não possui raízes reais, apenas raízes complexas. Isso significa que a parábola que representa a equação não cruza o eixo x em nenhum ponto.",
-            parentId: comment.id,
-            isQuestion: false,
-            isProfessorResponse: true
-          });
-        });
-        
-        // Adicionar algumas avaliações
-        this.addVideoRating({
-          userId: 1,
-          videoId: firstVideo.id,
-          rating: 5,
-          comment: "Excelente aula! O professor explica de forma clara e didática."
-        });
-        
-        this.addVideoRating({
-          userId: 2,
-          videoId: firstVideo.id,
-          rating: 4,
-          comment: "Muito boa, mas poderia ter mais exemplos."
-        });
+    // Criar algumas disciplinas
+    const subjects = [
+      { id: 1, name: "Matemática", slug: "matematica", description: "Álgebra, geometria, estatística, etc." },
+      { id: 2, name: "Português", slug: "portugues", description: "Gramática, interpretação de texto, literatura, etc." },
+      { id: 3, name: "Física", slug: "fisica", description: "Mecânica, eletromagnetismo, termodinâmica, etc." },
+      { id: 4, name: "Química", slug: "quimica", description: "Química orgânica, inorgânica, físico-química, etc." },
+      { id: 5, name: "Biologia", slug: "biologia", description: "Citologia, genética, ecologia, etc." }
+    ];
+    
+    subjects.forEach(subject => {
+      this.subjects.set(subject.id, {
+        ...subject,
+        createdAt: new Date("2023-01-01"),
+        updatedAt: new Date("2023-01-01")
+      });
+    });
+    
+    this.currentSubjectId = subjects.length + 1;
+    
+    // Criar alguns materiais de estudo
+    const materials = [
+      { 
+        id: 1, 
+        title: "Hereditariedade: o que é, como funciona", 
+        slug: "hereditariedade", 
+        content: "A Hereditariedade é o fenômeno que estuda a transmissão das características genéticas de uma geração a outra...",
+        subjectId: 5,
+        type: "article"
+      },
+      { 
+        id: 2, 
+        title: "Funções do 1º Grau: Guia Completo", 
+        slug: "funcoes-primeiro-grau", 
+        content: "Neste artigo exploraremos os conceitos fundamentais das funções do 1º grau...",
+        subjectId: 1,
+        type: "article"
+      },
+      { 
+        id: 3, 
+        title: "Análise de O Cortiço - Literatura Brasileira", 
+        slug: "analise-o-cortico", 
+        content: "Neste artigo analisamos a obra 'O Cortiço' de Aluísio Azevedo...",
+        subjectId: 2,
+        type: "article"
       }
-    }, 500); // Pequeno delay para garantir que os vídeos já foram criados
+    ];
+    
+    materials.forEach(material => {
+      this.studyMaterials.set(material.id, {
+        ...material,
+        authorId: 1,
+        createdAt: new Date("2023-02-15"),
+        updatedAt: new Date("2023-02-15"),
+        featured: Math.random() > 0.5,
+        readTime: Math.floor(Math.random() * 15) + 5,
+        difficulty: Math.floor(Math.random() * 3) + 1
+      });
+    });
+    
+    this.currentStudyMaterialId = materials.length + 1;
+    
+    // Adicionar estatísticas do usuário
+    this.userPerformance.set(1, {
+      userId: 1,
+      questionsResolved: 248,
+      correctAnswers: 187,
+      wrongAnswers: 61,
+      studyTime: 4230,
+      lastStudyDate: new Date("2023-04-19"),
+      subjectPerformance: {
+        "matematica": { correct: 45, total: 62 },
+        "portugues": { correct: 52, total: 65 },
+        "fisica": { correct: 28, total: 37 },
+        "quimica": { correct: 32, total: 39 },
+        "biologia": { correct: 30, total: 45 }
+      },
+      weeklyActivity: {
+        "2023-04-13": 45,
+        "2023-04-14": 60,
+        "2023-04-15": 30,
+        "2023-04-16": 0,
+        "2023-04-17": 75,
+        "2023-04-18": 120,
+        "2023-04-19": 90
+      },
+      createdAt: new Date("2023-01-15"),
+      updatedAt: new Date("2023-04-19")
+    });
+    
+    // Adicionar algumas notícias
+    const newsItems = [
+      {
+        id: 1,
+        title: "Novas questões de matemática disponíveis",
+        slug: "novas-questoes-matematica",
+        content: "Acabamos de adicionar mais de 100 novas questões de matemática...",
+        featured: true,
+        imageUrl: "https://example.com/math-banner.jpg"
+      },
+      {
+        id: 2,
+        title: "Atualização do cronograma do ENEM 2023",
+        slug: "atualizacao-cronograma-enem-2023",
+        content: "O INEP divulgou o novo cronograma oficial para o ENEM 2023...",
+        featured: true,
+        imageUrl: "https://example.com/enem-calendar.jpg"
+      }
+    ];
+    
+    newsItems.forEach(item => {
+      this.news.set(item.id, {
+        ...item,
+        authorId: 1,
+        createdAt: new Date("2023-04-01"),
+        updatedAt: new Date("2023-04-01")
+      });
+    });
+    
+    this.currentNewsId = newsItems.length + 1;
   }
 
-  // User methods
+  // Users
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserIds++;
-    const user: User = { ...insertUser, id, createdAt: new Date() };
-    this.users.set(id, user);
-    return user;
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
   }
   
-  // Subject methods
+  async createUser(user: InsertUser): Promise<User> {
+    const id = this.currentUserId++;
+    const now = new Date();
+    
+    const newUser: User = {
+      ...user,
+      id,
+      createdAt: now,
+      updatedAt: now,
+      isVerified: false,
+      level: 1,
+      xp: 0,
+      premium: false
+    };
+    
+    this.users.set(id, newUser);
+    return newUser;
+  }
+  
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User> {
+    const user = await this.getUser(id);
+    if (!user) throw new Error(`User with id ${id} not found`);
+    
+    const updatedUser: User = {
+      ...user,
+      ...userData,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async updateStripeCustomerId(id: number, stripeCustomerId: string): Promise<User> {
+    const user = await this.getUser(id);
+    if (!user) throw new Error(`User with id ${id} not found`);
+    
+    const updatedUser: User = {
+      ...user,
+      stripeCustomerId,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserStripeInfo(id: number, stripeData: any): Promise<User> {
+    const user = await this.getUser(id);
+    if (!user) throw new Error(`User with id ${id} not found`);
+    
+    const updatedUser: User = {
+      ...user,
+      stripeCustomerId: stripeData.customerId,
+      stripeSubscriptionId: stripeData.subscriptionId,
+      premium: true,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+  
+  // Subjects
   async getAllSubjects(): Promise<Subject[]> {
     return Array.from(this.subjects.values());
   }
   
-  async getSubjectByCode(code: string): Promise<Subject | undefined> {
-    return Array.from(this.subjects.values()).find(
-      (subject) => subject.code === code,
-    );
+  async getSubjectById(id: number): Promise<Subject | undefined> {
+    return this.subjects.get(id);
   }
   
-  async getSubjectDetails(code: string): Promise<any> {
-    const subject = await this.getSubjectByCode(code);
-    if (!subject) return undefined;
+  async createSubject(subject: InsertSubject): Promise<Subject> {
+    const id = this.currentSubjectId++;
+    const now = new Date();
     
-    const questions = await this.getQuestionsBySubject(code);
-    const materials = await this.getMaterialsBySubject(code);
-    
-    return {
+    const newSubject: Subject = {
       ...subject,
-      questions: questions.length,
-      materials: materials.length,
-      progress: Math.floor(Math.random() * 100),
-      topPerformance: Math.floor(Math.random() * 100)
+      id,
+      createdAt: now,
+      updatedAt: now
     };
+    
+    this.subjects.set(id, newSubject);
+    return newSubject;
   }
   
-  async createSubject(insertSubject: InsertSubject): Promise<Subject> {
-    const id = this.currentSubjectIds++;
-    const subject: Subject = { ...insertSubject, id };
-    this.subjects.set(id, subject);
-    return subject;
+  async updateSubject(id: number, data: Partial<InsertSubject>): Promise<Subject> {
+    const subject = await this.getSubjectById(id);
+    if (!subject) throw new Error(`Subject with id ${id} not found`);
+    
+    const updatedSubject: Subject = {
+      ...subject,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.subjects.set(id, updatedSubject);
+    return updatedSubject;
   }
   
-  // Question methods
+  // Questions
   async getAllQuestions(): Promise<Question[]> {
     return Array.from(this.questions.values());
-  }
-  
-  async getQuestionsBySubject(subject: string): Promise<Question[]> {
-    return Array.from(this.questions.values()).filter(
-      (question) => question.subject === subject,
-    );
   }
   
   async getQuestionById(id: number): Promise<Question | undefined> {
     return this.questions.get(id);
   }
   
-  async createQuestion(insertQuestion: InsertQuestion): Promise<Question> {
-    const id = this.currentQuestionIds++;
-    const question: Question = { ...insertQuestion, id, createdAt: new Date() };
-    this.questions.set(id, question);
-    return question;
+  async getQuestionsBySubject(subjectId: number): Promise<Question[]> {
+    return Array.from(this.questions.values())
+      .filter(question => question.subjectId === subjectId);
   }
   
-  // Study Material methods
-  async getAllMaterials(): Promise<StudyMaterial[]> {
+  async createQuestion(question: InsertQuestion): Promise<Question> {
+    const id = this.currentQuestionId++;
+    const now = new Date();
+    
+    const newQuestion: Question = {
+      ...question,
+      id,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.questions.set(id, newQuestion);
+    return newQuestion;
+  }
+  
+  async updateQuestion(id: number, data: Partial<InsertQuestion>): Promise<Question> {
+    const question = await this.getQuestionById(id);
+    if (!question) throw new Error(`Question with id ${id} not found`);
+    
+    const updatedQuestion: Question = {
+      ...question,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.questions.set(id, updatedQuestion);
+    return updatedQuestion;
+  }
+  
+  // Study Materials
+  async getAllStudyMaterials(): Promise<StudyMaterial[]> {
     return Array.from(this.studyMaterials.values());
   }
   
-  async getRecentMaterials(): Promise<StudyMaterial[]> {
-    return Array.from(this.studyMaterials.values())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, 3);
-  }
-  
-  async getMaterialsBySubject(subject: string): Promise<StudyMaterial[]> {
-    return Array.from(this.studyMaterials.values()).filter(
-      (material) => material.subject === subject,
-    );
-  }
-  
-  async getMaterialById(id: number): Promise<StudyMaterial | undefined> {
+  async getStudyMaterialById(id: number): Promise<StudyMaterial | undefined> {
     return this.studyMaterials.get(id);
   }
   
-  async createMaterial(insertMaterial: InsertStudyMaterial): Promise<StudyMaterial> {
-    const id = this.currentMaterialIds++;
-    const material: StudyMaterial = { ...insertMaterial, id, createdAt: new Date() };
-    this.studyMaterials.set(id, material);
-    return material;
+  async getStudyMaterialsBySubject(subjectId: number): Promise<StudyMaterial[]> {
+    return Array.from(this.studyMaterials.values())
+      .filter(material => material.subjectId === subjectId);
   }
   
-  // User Performance methods
-  async getUserPerformance(): Promise<any> {
-    return {
-      overall: {
-        questionsResolved: 248,
-        correctPercentage: 76,
-        hoursStudied: 42,
-        streak: 8
-      },
-      bySubject: [
-        { subject: "Português", percentage: 82, color: "#3b82f6" },
-        { subject: "Matemática", percentage: 65, color: "#22c55e" },
-        { subject: "Física", percentage: 58, color: "#eab308" },
-        { subject: "Química", percentage: 72, color: "#22c55e" },
-        { subject: "Biologia", percentage: 88, color: "#22c55e" },
-        { subject: "História", percentage: 76, color: "#ef4444" },
-        { subject: "Geografia", percentage: 70, color: "#f97316" },
-      ],
-      progress: [
-        {
-          id: "Acertos",
-          color: "#7c3aed",
-          data: [
-            { x: "Sem 1", y: 65 },
-            { x: "Sem 2", y: 68 },
-            { x: "Sem 3", y: 72 },
-            { x: "Sem 4", y: 76 },
-            { x: "Sem 5", y: 74 },
-            { x: "Sem 6", y: 80 },
-          ]
-        },
-        {
-          id: "Questões",
-          color: "#22c55e",
-          data: [
-            { x: "Sem 1", y: 25 },
-            { x: "Sem 2", y: 36 },
-            { x: "Sem 3", y: 30 },
-            { x: "Sem 4", y: 45 },
-            { x: "Sem 5", y: 40 },
-            { x: "Sem 6", y: 55 },
-          ]
-        }
-      ]
-    };
-  }
-  
-  async getUserPerformanceBySubject(subject: string): Promise<any> {
-    const subjectData = {
-      "portugues": { percentage: 82, questions: 120, avgTime: "2m 30s" },
-      "matematica": { percentage: 65, questions: 85, avgTime: "3m 15s" },
-      "fisica": { percentage: 58, questions: 62, avgTime: "2m 45s" },
-      "quimica": { percentage: 72, questions: 78, avgTime: "2m 20s" },
-      "biologia": { percentage: 88, questions: 90, avgTime: "1m 50s" },
+  async createStudyMaterial(material: InsertStudyMaterial): Promise<StudyMaterial> {
+    const id = this.currentStudyMaterialId++;
+    const now = new Date();
+    
+    const newMaterial: StudyMaterial = {
+      ...material,
+      id,
+      createdAt: now,
+      updatedAt: now
     };
     
-    return subjectData[subject] || { percentage: 0, questions: 0, avgTime: "0m 0s" };
+    this.studyMaterials.set(id, newMaterial);
+    return newMaterial;
   }
   
-  async addUserPerformance(insertPerformance: InsertUserPerformance): Promise<UserPerformance> {
-    const id = this.currentPerformanceIds++;
-    const performance: UserPerformance = { ...insertPerformance, id, attemptDate: new Date() };
-    this.userPerformance.set(id, performance);
-    return performance;
+  async updateStudyMaterial(id: number, data: Partial<InsertStudyMaterial>): Promise<StudyMaterial> {
+    const material = await this.getStudyMaterialById(id);
+    if (!material) throw new Error(`Study material with id ${id} not found`);
+    
+    const updatedMaterial: StudyMaterial = {
+      ...material,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.studyMaterials.set(id, updatedMaterial);
+    return updatedMaterial;
   }
   
-  // News methods
-  async getNews(): Promise<News[]> {
-    return Array.from(this.news.values())
-      .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+  async getRecentStudyMaterials(limit = 5): Promise<StudyMaterial[]> {
+    const materials = Array.from(this.studyMaterials.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    return materials.slice(0, limit);
+  }
+  
+  // User Performance
+  async getUserPerformance(userId: number): Promise<UserPerformance | undefined> {
+    return this.userPerformance.get(userId);
+  }
+  
+  async createUserPerformance(performance: InsertUserPerformance): Promise<UserPerformance> {
+    const now = new Date();
+    
+    const newPerformance: UserPerformance = {
+      ...performance,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.userPerformance.set(performance.userId, newPerformance);
+    return newPerformance;
+  }
+  
+  async updateUserPerformance(userId: number, data: Partial<InsertUserPerformance>): Promise<UserPerformance> {
+    const performance = await this.getUserPerformance(userId);
+    
+    if (!performance) {
+      return this.createUserPerformance({
+        userId,
+        questionsResolved: data.questionsResolved || 0,
+        correctAnswers: data.correctAnswers || 0,
+        wrongAnswers: data.wrongAnswers || 0,
+        studyTime: data.studyTime || 0,
+        lastStudyDate: data.lastStudyDate || new Date(),
+        subjectPerformance: data.subjectPerformance || {},
+        weeklyActivity: data.weeklyActivity || {}
+      });
+    }
+    
+    const updatedPerformance: UserPerformance = {
+      ...performance,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.userPerformance.set(userId, updatedPerformance);
+    return updatedPerformance;
+  }
+  
+  async getUserStatistics(userId: number): Promise<any> {
+    const performance = await this.getUserPerformance(userId);
+    if (!performance) return null;
+    
+    // Calcular estatísticas
+    const correctPercentage = performance.questionsResolved > 0 
+      ? Math.round((performance.correctAnswers / performance.questionsResolved) * 100) 
+      : 0;
+    
+    // Calcular ranking (mockado para agora)
+    const ranking = {
+      position: 42,
+      total: 1250
+    };
+    
+    return {
+      questionsResolved: performance.questionsResolved,
+      correctPercentage,
+      studyTime: performance.studyTime,
+      lastStudyDate: performance.lastStudyDate,
+      subjectPerformance: performance.subjectPerformance,
+      weeklyActivity: performance.weeklyActivity,
+      ranking
+    };
+  }
+  
+  // Implementar todos os outros métodos conforme a interface
+  async getAllNews(): Promise<News[]> {
+    return Array.from(this.news.values());
   }
   
   async getNewsById(id: number): Promise<News | undefined> {
     return this.news.get(id);
   }
   
-  async createNews(insertNews: InsertNews): Promise<News> {
-    const id = this.currentNewsIds++;
-    const newsItem: News = { ...insertNews, id, publishedAt: new Date() };
-    this.news.set(id, newsItem);
-    return newsItem;
+  async createNews(news: InsertNews): Promise<News> {
+    const id = this.currentNewsId++;
+    const now = new Date();
+    
+    const newNews: News = {
+      ...news,
+      id,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.news.set(id, newNews);
+    return newNews;
   }
   
-  // Video Lessons methods
+  async updateNews(id: number, data: Partial<InsertNews>): Promise<News> {
+    const news = await this.getNewsById(id);
+    if (!news) throw new Error(`News with id ${id} not found`);
+    
+    const updatedNews: News = {
+      ...news,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.news.set(id, updatedNews);
+    return updatedNews;
+  }
+  
+  async getRecentNews(limit = 5): Promise<News[]> {
+    const newsItems = Array.from(this.news.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    return newsItems.slice(0, limit);
+  }
+  
+  // Video Lessons
   async getAllVideoLessons(): Promise<VideoLesson[]> {
     return Array.from(this.videoLessons.values());
-  }
-  
-  async getVideoLessonsBySubject(subject: string): Promise<VideoLesson[]> {
-    return Array.from(this.videoLessons.values()).filter(
-      (video) => video.subject === subject,
-    );
-  }
-  
-  async getVideoLessonsByCategory(categoryId: number): Promise<VideoLesson[]> {
-    const relations = Array.from(this.videoCategoryRelations.values())
-      .filter(relation => relation.categoryId === categoryId)
-      .map(relation => relation.videoId);
-      
-    return Array.from(this.videoLessons.values()).filter(
-      (video) => relations.includes(video.id),
-    );
-  }
-  
-  async getRecentVideoLessons(limit: number = 6): Promise<VideoLesson[]> {
-    return Array.from(this.videoLessons.values())
-      .sort((a, b) => {
-        if (a.publishedAt && b.publishedAt) {
-          return b.publishedAt.getTime() - a.publishedAt.getTime();
-        }
-        return 0;
-      })
-      .slice(0, limit);
   }
   
   async getVideoLessonById(id: number): Promise<VideoLesson | undefined> {
     return this.videoLessons.get(id);
   }
   
-  async createVideoLesson(videoLesson: InsertVideoLesson): Promise<VideoLesson> {
-    const id = this.currentVideoLessonIds++;
-    const video: VideoLesson = { 
-      ...videoLesson, 
-      id, 
-      publishedAt: new Date(),
-      viewCount: 0
-    };
-    this.videoLessons.set(id, video);
-    return video;
+  async getVideoLessonsBySubject(subjectId: number): Promise<VideoLesson[]> {
+    return Array.from(this.videoLessons.values())
+      .filter(video => video.subjectId === subjectId);
   }
   
-  async incrementVideoViews(id: number): Promise<void> {
+  async getVideoLessonsByCategory(categoryId: number): Promise<VideoLesson[]> {
+    // Obter as relações para esta categoria
+    const relations = Array.from(this.videoCategoryRelations.values())
+      .filter(relation => relation.categoryId === categoryId);
+    
+    // Buscar os vídeos correspondentes
+    const videos: VideoLesson[] = [];
+    for (const relation of relations) {
+      const video = await this.getVideoLessonById(relation.videoId);
+      if (video) videos.push(video);
+    }
+    
+    return videos;
+  }
+  
+  async createVideoLesson(video: InsertVideoLesson): Promise<VideoLesson> {
+    const id = this.currentVideoLessonId++;
+    const now = new Date();
+    
+    const newVideo: VideoLesson = {
+      ...video,
+      id,
+      createdAt: now,
+      updatedAt: now,
+      viewCount: 0,
+      favoriteCount: 0,
+      averageRating: 0
+    };
+    
+    this.videoLessons.set(id, newVideo);
+    return newVideo;
+  }
+  
+  async updateVideoLesson(id: number, data: Partial<InsertVideoLesson>): Promise<VideoLesson> {
     const video = await this.getVideoLessonById(id);
-    if (video) {
-      video.viewCount += 1;
-      this.videoLessons.set(id, video);
-    }
+    if (!video) throw new Error(`Video lesson with id ${id} not found`);
+    
+    const updatedVideo: VideoLesson = {
+      ...video,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.videoLessons.set(id, updatedVideo);
+    return updatedVideo;
   }
   
-  // Video Progress methods
+  async getPopularVideoLessons(limit = 5): Promise<VideoLesson[]> {
+    const videos = Array.from(this.videoLessons.values())
+      .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+    
+    return videos.slice(0, limit);
+  }
+  
+  async getRecentVideoLessons(limit = 5): Promise<VideoLesson[]> {
+    const videos = Array.from(this.videoLessons.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    return videos.slice(0, limit);
+  }
+  
+  async getFavoriteVideoLessons(userId: number): Promise<VideoLesson[]> {
+    // Implementar favoritação de vídeos
+    return [];
+  }
+  
+  // Video Progress
   async getVideoProgress(userId: number, videoId: number): Promise<VideoProgress | undefined> {
-    return Array.from(this.videoProgress.values()).find(
-      (progress) => progress.userId === userId && progress.videoId === videoId,
-    );
+    const key = `${userId}-${videoId}`;
+    return this.videoProgress.get(key);
   }
   
-  async updateVideoProgress(userId: number, videoId: number, progress: number): Promise<VideoProgress> {
-    let videoProgress = await this.getVideoProgress(userId, videoId);
+  async createVideoProgress(progress: InsertVideoProgress): Promise<VideoProgress> {
+    const key = `${progress.userId}-${progress.videoId}`;
+    const now = new Date();
     
-    if (videoProgress) {
-      videoProgress.progress = progress;
-      videoProgress.lastWatched = new Date();
-      // Auto-mark as watched if progress is > 90%
-      if (progress > 0.9) {
-        videoProgress.watched = true;
-      }
-      this.videoProgress.set(videoProgress.id, videoProgress);
-      return videoProgress;
+    const newProgress: VideoProgress = {
+      ...progress,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.videoProgress.set(key, newProgress);
+    
+    // Atualizar contagem de visualizações do vídeo
+    const video = await this.getVideoLessonById(progress.videoId);
+    if (video) {
+      this.videoLessons.set(video.id, {
+        ...video,
+        viewCount: (video.viewCount || 0) + 1
+      });
     }
     
-    // Create a new progress entry if none exists
-    const id = this.currentVideoProgressIds++;
-    videoProgress = { 
-      id, 
-      userId, 
-      videoId, 
-      progress, 
-      watched: progress > 0.9,
-      favorite: false,
-      lastWatched: new Date()
-    };
-    this.videoProgress.set(id, videoProgress);
-    return videoProgress;
+    return newProgress;
   }
   
-  async setVideoWatched(userId: number, videoId: number, watched: boolean): Promise<VideoProgress> {
-    let videoProgress = await this.getVideoProgress(userId, videoId);
+  async updateVideoProgress(userId: number, videoId: number, data: Partial<InsertVideoProgress>): Promise<VideoProgress> {
+    const key = `${userId}-${videoId}`;
+    const progress = await this.getVideoProgress(userId, videoId);
     
-    if (videoProgress) {
-      videoProgress.watched = watched;
-      videoProgress.lastWatched = new Date();
-      this.videoProgress.set(videoProgress.id, videoProgress);
-      return videoProgress;
+    if (!progress) {
+      return this.createVideoProgress({
+        userId,
+        videoId,
+        currentTime: data.currentTime || 0,
+        isCompleted: data.isCompleted || false,
+        lastWatched: new Date()
+      });
     }
     
-    // Create a new progress entry if none exists
-    const id = this.currentVideoProgressIds++;
-    videoProgress = { 
-      id, 
-      userId, 
-      videoId, 
-      progress: watched ? 1 : 0, 
-      watched,
-      favorite: false,
-      lastWatched: new Date()
+    const updatedProgress: VideoProgress = {
+      ...progress,
+      ...data,
+      updatedAt: new Date()
     };
-    this.videoProgress.set(id, videoProgress);
-    return videoProgress;
+    
+    this.videoProgress.set(key, updatedProgress);
+    return updatedProgress;
   }
   
-  async toggleVideoFavorite(userId: number, videoId: number): Promise<VideoProgress> {
-    let videoProgress = await this.getVideoProgress(userId, videoId);
+  async getUserVideoProgresses(userId: number): Promise<VideoProgress[]> {
+    return Array.from(this.videoProgress.values())
+      .filter(progress => progress.userId === userId);
+  }
+  
+  // Video Ratings
+  async getVideoRating(userId: number, videoId: number): Promise<VideoRating | undefined> {
+    const key = `${userId}-${videoId}`;
+    return this.videoRatings.get(key);
+  }
+  
+  async createVideoRating(rating: InsertVideoRating): Promise<VideoRating> {
+    const key = `${rating.userId}-${rating.videoId}`;
+    const now = new Date();
     
-    if (videoProgress) {
-      videoProgress.favorite = !videoProgress.favorite;
-      this.videoProgress.set(videoProgress.id, videoProgress);
-      return videoProgress;
+    const newRating: VideoRating = {
+      ...rating,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.videoRatings.set(key, newRating);
+    
+    // Atualizar a classificação média do vídeo
+    await this.updateVideoAverageRating(rating.videoId);
+    
+    return newRating;
+  }
+  
+  async updateVideoRating(userId: number, videoId: number, data: Partial<InsertVideoRating>): Promise<VideoRating> {
+    const key = `${userId}-${videoId}`;
+    const rating = await this.getVideoRating(userId, videoId);
+    
+    if (!rating) {
+      return this.createVideoRating({
+        userId,
+        videoId,
+        rating: data.rating || 0,
+        comment: data.comment || ""
+      });
     }
     
-    // Create a new progress entry if none exists
-    const id = this.currentVideoProgressIds++;
-    videoProgress = { 
-      id, 
-      userId, 
-      videoId, 
-      progress: 0, 
-      watched: false,
-      favorite: true,
-      lastWatched: new Date()
+    const updatedRating: VideoRating = {
+      ...rating,
+      ...data,
+      updatedAt: new Date()
     };
-    this.videoProgress.set(id, videoProgress);
-    return videoProgress;
+    
+    this.videoRatings.set(key, updatedRating);
+    
+    // Atualizar a classificação média do vídeo
+    await this.updateVideoAverageRating(videoId);
+    
+    return updatedRating;
   }
   
-  async getFavoriteVideos(userId: number): Promise<VideoLesson[]> {
-    const favoriteIds = Array.from(this.videoProgress.values())
-      .filter(progress => progress.userId === userId && progress.favorite)
-      .map(progress => progress.videoId);
-      
-    return Array.from(this.videoLessons.values()).filter(
-      (video) => favoriteIds.includes(video.id),
-    );
-  }
-  
-  async getWatchedVideos(userId: number): Promise<VideoLesson[]> {
-    const watchedIds = Array.from(this.videoProgress.values())
-      .filter(progress => progress.userId === userId && progress.watched)
-      .map(progress => progress.videoId);
-      
-    return Array.from(this.videoLessons.values()).filter(
-      (video) => watchedIds.includes(video.id),
-    );
-  }
-  
-  // Video Ratings and Comments methods
-  async getVideoRatings(videoId: number): Promise<VideoRating[]> {
-    return Array.from(this.videoRatings.values()).filter(
-      (rating) => rating.videoId === videoId,
-    );
-  }
-  
-  async addVideoRating(rating: InsertVideoRating): Promise<VideoRating> {
-    const id = this.currentVideoRatingIds++;
-    const videoRating: VideoRating = { ...rating, id, createdAt: new Date() };
-    this.videoRatings.set(id, videoRating);
-    return videoRating;
-  }
-  
-  async getAverageVideoRating(videoId: number): Promise<number> {
+  private async updateVideoAverageRating(videoId: number): Promise<void> {
     const ratings = await this.getVideoRatings(videoId);
-    if (ratings.length === 0) return 0;
     
-    const sum = ratings.reduce((total, rating) => total + rating.rating, 0);
-    return sum / ratings.length;
+    // Calcular a média
+    const sum = ratings.reduce((acc, curr) => acc + curr.rating, 0);
+    const average = ratings.length > 0 ? sum / ratings.length : 0;
+    
+    // Atualizar o vídeo
+    const video = await this.getVideoLessonById(videoId);
+    if (video) {
+      this.videoLessons.set(videoId, {
+        ...video,
+        averageRating: average
+      });
+    }
   }
   
+  async getVideoRatings(videoId: number): Promise<VideoRating[]> {
+    return Array.from(this.videoRatings.values())
+      .filter(rating => rating.videoId === videoId);
+  }
+  
+  // Video Comments
   async getVideoComments(videoId: number): Promise<VideoComment[]> {
     return Array.from(this.videoComments.values())
       .filter(comment => comment.videoId === videoId)
-      .sort((a, b) => {
-        if (a.createdAt && b.createdAt) {
-          return b.createdAt.getTime() - a.createdAt.getTime();
-        }
-        return 0;
-      });
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
   
-  async addVideoComment(comment: InsertVideoComment): Promise<VideoComment> {
-    const id = this.currentVideoCommentIds++;
-    const videoComment: VideoComment = { ...comment, id, createdAt: new Date() };
-    this.videoComments.set(id, videoComment);
-    return videoComment;
+  async getVideoCommentById(id: number): Promise<VideoComment | undefined> {
+    return this.videoComments.get(id);
   }
   
-  // Categories methods
+  async createVideoComment(comment: InsertVideoComment): Promise<VideoComment> {
+    const id = this.currentVideoCommentId++;
+    const now = new Date();
+    
+    const newComment: VideoComment = {
+      ...comment,
+      id,
+      createdAt: now,
+      updatedAt: now,
+      likes: 0,
+      dislikes: 0
+    };
+    
+    this.videoComments.set(id, newComment);
+    return newComment;
+  }
+  
+  async updateVideoComment(id: number, data: Partial<InsertVideoComment>): Promise<VideoComment> {
+    const comment = await this.getVideoCommentById(id);
+    if (!comment) throw new Error(`Video comment with id ${id} not found`);
+    
+    const updatedComment: VideoComment = {
+      ...comment,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.videoComments.set(id, updatedComment);
+    return updatedComment;
+  }
+  
+  async deleteVideoComment(id: number): Promise<boolean> {
+    return this.videoComments.delete(id);
+  }
+  
+  // Categories
   async getAllCategories(): Promise<Category[]> {
     return Array.from(this.categories.values());
-  }
-  
-  async getCategoriesBySubject(subject: string): Promise<Category[]> {
-    return Array.from(this.categories.values()).filter(
-      (category) => category.subject === subject,
-    );
   }
   
   async getCategoryById(id: number): Promise<Category | undefined> {
@@ -984,55 +957,117 @@ export class MemStorage implements IStorage {
   }
   
   async createCategory(category: InsertCategory): Promise<Category> {
-    const id = this.currentCategoryIds++;
-    const newCategory: Category = { ...category, id, createdAt: new Date() };
+    const id = this.currentCategoryId++;
+    const now = new Date();
+    
+    const newCategory: Category = {
+      ...category,
+      id,
+      createdAt: now,
+      updatedAt: now
+    };
+    
     this.categories.set(id, newCategory);
     return newCategory;
   }
   
-  // Video Exercises methods
-  async getVideoExercises(videoId: number): Promise<Question[]> {
-    const exercisesIds = Array.from(this.videoExercises.values())
-      .filter(exercise => exercise.videoId === videoId)
-      .sort((a, b) => a.orderInVideo - b.orderInVideo)
-      .map(exercise => exercise.questionId);
+  async updateCategory(id: number, data: Partial<InsertCategory>): Promise<Category> {
+    const category = await this.getCategoryById(id);
+    if (!category) throw new Error(`Category with id ${id} not found`);
     
-    const questions: Question[] = [];
-    for (const id of exercisesIds) {
-      const question = await this.getQuestionById(id);
-      if (question) questions.push(question);
-    }
+    const updatedCategory: Category = {
+      ...category,
+      ...data,
+      updatedAt: new Date()
+    };
     
-    return questions;
+    this.categories.set(id, updatedCategory);
+    return updatedCategory;
   }
   
-  async addVideoExercise(exercise: InsertVideoExercise): Promise<VideoExercise> {
-    const id = this.currentVideoExerciseIds++;
-    const videoExercise: VideoExercise = { ...exercise, id };
-    this.videoExercises.set(id, videoExercise);
-    return videoExercise;
+  // Video Category Relations
+  async createVideoCategoryRelation(relation: InsertVideoCategoryRelation): Promise<VideoCategoryRelation> {
+    const id = this.currentVideoCategoryRelationId++;
+    
+    const newRelation: VideoCategoryRelation = {
+      ...relation,
+      id
+    };
+    
+    this.videoCategoryRelations.set(id, newRelation);
+    return newRelation;
   }
   
-  // Category-Video relation methods
-  async addVideoCategoryRelation(relation: InsertVideoCategoryRelation): Promise<VideoCategoryRelation> {
-    const id = this.currentVideoCategoryRelationIds++;
-    const videoCategoryRelation: VideoCategoryRelation = { ...relation, id };
-    this.videoCategoryRelations.set(id, videoCategoryRelation);
-    return videoCategoryRelation;
-  }
-
-  // ===========================================
-  // Flash Cards Implementation
-  // ===========================================
-  
-  async getAllFlashCards(userId: number): Promise<FlashCard[]> {
-    const cards = Array.from(this.flashCards.values());
-    return cards.filter(card => card.userId === userId);
+  async getVideoCategoriesByVideo(videoId: number): Promise<Category[]> {
+    // Encontrar todas as relações para este vídeo
+    const relationIds = Array.from(this.videoCategoryRelations.values())
+      .filter(relation => relation.videoId === videoId)
+      .map(relation => relation.categoryId);
+    
+    // Buscar as categorias correspondentes
+    const categories = await Promise.all(
+      relationIds.map(id => this.getCategoryById(id))
+    );
+    
+    return categories.filter(Boolean) as Category[];
   }
   
-  async getFlashCardsBySubject(userId: number, subject: string): Promise<FlashCard[]> {
-    const cards = Array.from(this.flashCards.values());
-    return cards.filter(card => card.userId === userId && card.subject === subject);
+  async getVideosByCategory(categoryId: number): Promise<VideoLesson[]> {
+    // Encontrar todas as relações para esta categoria
+    const videoIds = Array.from(this.videoCategoryRelations.values())
+      .filter(relation => relation.categoryId === categoryId)
+      .map(relation => relation.videoId);
+    
+    // Buscar os vídeos correspondentes
+    const videos = await Promise.all(
+      videoIds.map(id => this.getVideoLessonById(id))
+    );
+    
+    return videos.filter(Boolean) as VideoLesson[];
+  }
+  
+  // Video Exercises
+  async getVideoExercises(videoId: number): Promise<VideoExercise[]> {
+    return Array.from(this.videoExercises.values())
+      .filter(exercise => exercise.videoId === videoId);
+  }
+  
+  async getVideoExerciseById(id: number): Promise<VideoExercise | undefined> {
+    return this.videoExercises.get(id);
+  }
+  
+  async createVideoExercise(exercise: InsertVideoExercise): Promise<VideoExercise> {
+    const id = this.currentVideoExerciseId++;
+    const now = new Date();
+    
+    const newExercise: VideoExercise = {
+      ...exercise,
+      id,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.videoExercises.set(id, newExercise);
+    return newExercise;
+  }
+  
+  async updateVideoExercise(id: number, data: Partial<InsertVideoExercise>): Promise<VideoExercise> {
+    const exercise = await this.getVideoExerciseById(id);
+    if (!exercise) throw new Error(`Video exercise with id ${id} not found`);
+    
+    const updatedExercise: VideoExercise = {
+      ...exercise,
+      ...data,
+      updatedAt: new Date()
+    };
+    
+    this.videoExercises.set(id, updatedExercise);
+    return updatedExercise;
+  }
+  
+  // Flash Cards
+  async getAllFlashCards(): Promise<FlashCard[]> {
+    return Array.from(this.flashCards.values());
   }
   
   async getFlashCardById(id: number): Promise<FlashCard | undefined> {
@@ -1040,17 +1075,14 @@ export class MemStorage implements IStorage {
   }
   
   async createFlashCard(flashCard: InsertFlashCard): Promise<FlashCard> {
-    const id = this.currentFlashCardIds++;
-    const createdAt = new Date();
-    const updatedAt = new Date();
+    const id = this.currentFlashCardId++;
+    const now = new Date();
     
     const newFlashCard: FlashCard = {
       ...flashCard,
       id,
-      createdAt,
-      updatedAt,
-      reviewCount: 0,
-      lastInterval: 1
+      createdAt: now,
+      updatedAt: now
     };
     
     this.flashCards.set(id, newFlashCard);
@@ -1071,70 +1103,24 @@ export class MemStorage implements IStorage {
     return updatedFlashCard;
   }
   
-  async deleteFlashCard(id: number): Promise<boolean> {
-    const exists = this.flashCards.has(id);
-    if (!exists) return false;
+  async getFlashCardsByDeck(deckId: number): Promise<FlashCard[]> {
+    // Encontrar todas as relações deste deck
+    const cardRelations = Array.from(this.deckCards.values())
+      .filter(relation => relation.deckId === deckId);
     
-    this.flashCards.delete(id);
-    
-    // Também remover qualquer relacionamento com decks
-    for (const [deckCardId, deckCard] of this.deckCards.entries()) {
-      if (deckCard.cardId === id) {
-        this.deckCards.delete(deckCardId);
-      }
+    // Buscar os flashcards correspondentes
+    const cards: FlashCard[] = [];
+    for (const relation of cardRelations) {
+      const card = await this.getFlashCardById(relation.cardId);
+      if (card) cards.push(card);
     }
     
-    return true;
-  }
-  
-  async getDueFlashCards(userId: number, limit?: number): Promise<FlashCard[]> {
-    const now = new Date();
-    const cards = Array.from(this.flashCards.values())
-      .filter(card => card.userId === userId && card.nextReviewDate <= now)
-      .sort((a, b) => a.nextReviewDate.getTime() - b.nextReviewDate.getTime());
-    
-    return limit ? cards.slice(0, limit) : cards;
-  }
-  
-  async updateFlashCardReviewStatus(id: number, difficulty: number): Promise<FlashCard> {
-    const flashCard = await this.getFlashCardById(id);
-    if (!flashCard) throw new Error(`Flash card with id ${id} not found`);
-    
-    // Algoritmo de repetição espaçada simples
-    // Aumenta o intervalo com base na dificuldade relatada pelo usuário
-    let newInterval = flashCard.lastInterval;
-    
-    // Dificuldade varia de 1 (muito difícil) a 5 (muito fácil)
-    if (difficulty <= 2) {
-      // Difícil - intervalos menores
-      newInterval = Math.max(1, Math.floor(newInterval * 1.5));
-    } else if (difficulty === 3) {
-      // Normal - dobrar o intervalo
-      newInterval = newInterval * 2;
-    } else {
-      // Fácil - intervalos maiores
-      newInterval = newInterval * 2.5;
-    }
-    
-    const nextDate = new Date();
-    nextDate.setDate(nextDate.getDate() + newInterval);
-    
-    const updatedFlashCard: FlashCard = {
-      ...flashCard,
-      reviewCount: flashCard.reviewCount + 1,
-      lastInterval: newInterval,
-      nextReviewDate: nextDate,
-      updatedAt: new Date()
-    };
-    
-    this.flashCards.set(id, updatedFlashCard);
-    return updatedFlashCard;
+    return cards;
   }
   
   // Flash Card Decks
-  async getAllFlashCardDecks(userId: number): Promise<FlashCardDeck[]> {
-    const decks = Array.from(this.flashCardDecks.values());
-    return decks.filter(deck => deck.userId === userId || deck.isPublic);
+  async getAllFlashCardDecks(): Promise<FlashCardDeck[]> {
+    return Array.from(this.flashCardDecks.values());
   }
   
   async getFlashCardDeckById(id: number): Promise<FlashCardDeck | undefined> {
@@ -1142,15 +1128,14 @@ export class MemStorage implements IStorage {
   }
   
   async createFlashCardDeck(deck: InsertFlashCardDeck): Promise<FlashCardDeck> {
-    const id = this.currentFlashCardDeckIds++;
-    const createdAt = new Date();
-    const updatedAt = new Date();
+    const id = this.currentFlashCardDeckId++;
+    const now = new Date();
     
     const newDeck: FlashCardDeck = {
       ...deck,
       id,
-      createdAt,
-      updatedAt,
+      createdAt: now,
+      updatedAt: now,
       cardCount: 0
     };
     
@@ -1160,7 +1145,7 @@ export class MemStorage implements IStorage {
   
   async updateFlashCardDeck(id: number, data: Partial<InsertFlashCardDeck>): Promise<FlashCardDeck> {
     const deck = await this.getFlashCardDeckById(id);
-    if (!deck) throw new Error(`Deck with id ${id} not found`);
+    if (!deck) throw new Error(`Flash card deck with id ${id} not found`);
     
     const updatedDeck: FlashCardDeck = {
       ...deck,
@@ -1172,148 +1157,78 @@ export class MemStorage implements IStorage {
     return updatedDeck;
   }
   
-  async deleteFlashCardDeck(id: number): Promise<boolean> {
-    const exists = this.flashCardDecks.has(id);
-    if (!exists) return false;
-    
-    this.flashCardDecks.delete(id);
-    
-    // Remover todos os relacionamentos
-    for (const [deckCardId, deckCard] of this.deckCards.entries()) {
-      if (deckCard.deckId === id) {
-        this.deckCards.delete(deckCardId);
-      }
-    }
-    
-    return true;
-  }
-  
-  async getFlashCardDecksBySubject(userId: number, subject: string): Promise<FlashCardDeck[]> {
-    const decks = Array.from(this.flashCardDecks.values());
-    return decks.filter(deck => 
-      (deck.userId === userId || deck.isPublic) && 
-      deck.subject === subject
-    );
+  async getFlashCardDecksByUser(userId: number): Promise<FlashCardDeck[]> {
+    return Array.from(this.flashCardDecks.values())
+      .filter(deck => deck.userId === userId);
   }
   
   async getPublicFlashCardDecks(): Promise<FlashCardDeck[]> {
-    const decks = Array.from(this.flashCardDecks.values());
-    return decks.filter(deck => deck.isPublic);
+    return Array.from(this.flashCardDecks.values())
+      .filter(deck => deck.isPublic);
   }
   
-  // Deck Cards (Relação entre decks e cards)
-  async addFlashCardToDeck(deckId: number, cardId: number, order?: number): Promise<DeckCard> {
+  // Deck Cards
+  async addCardToDeck(deckId: number, cardId: number): Promise<DeckCard> {
+    // Verificar se o deck existe
     const deck = await this.getFlashCardDeckById(deckId);
-    if (!deck) throw new Error(`Deck with id ${deckId} not found`);
+    if (!deck) throw new Error(`Flash card deck with id ${deckId} not found`);
     
+    // Verificar se o cartão existe
     const card = await this.getFlashCardById(cardId);
     if (!card) throw new Error(`Flash card with id ${cardId} not found`);
     
-    // Verificar se já existe essa relação
+    // Verificar se a relação já existe
     const existingRelation = Array.from(this.deckCards.values())
       .find(dc => dc.deckId === deckId && dc.cardId === cardId);
     
     if (existingRelation) return existingRelation;
     
-    // Se não tiver ordem especificada, adicionar no final
-    if (order === undefined) {
-      const currentCards = Array.from(this.deckCards.values())
-        .filter(dc => dc.deckId === deckId);
-      
-      order = currentCards.length > 0 ? 
-        Math.max(...currentCards.map(c => c.order)) + 1 : 0;
-    }
+    // Criar a relação
+    const id = this.currentDeckCardId++;
     
-    const id = this.currentDeckCardIds++;
     const newRelation: DeckCard = {
       id,
       deckId,
-      cardId,
-      order
+      cardId
     };
     
     this.deckCards.set(id, newRelation);
     
-    // Atualizar contador de cards no deck
-    const updatedDeck: FlashCardDeck = {
+    // Atualizar contador de cartões no deck
+    this.flashCardDecks.set(deckId, {
       ...deck,
       cardCount: deck.cardCount + 1,
       updatedAt: new Date()
-    };
-    
-    this.flashCardDecks.set(deckId, updatedDeck);
+    });
     
     return newRelation;
   }
   
-  async removeFlashCardFromDeck(deckId: number, cardId: number): Promise<boolean> {
+  async removeCardFromDeck(deckId: number, cardId: number): Promise<boolean> {
+    // Verificar se o deck existe
     const deck = await this.getFlashCardDeckById(deckId);
-    if (!deck) throw new Error(`Deck with id ${deckId} not found`);
+    if (!deck) throw new Error(`Flash card deck with id ${deckId} not found`);
     
     // Encontrar a relação
-    const deckCardEntry = Array.from(this.deckCards.entries())
+    const relationEntry = Array.from(this.deckCards.entries())
       .find(([_, dc]) => dc.deckId === deckId && dc.cardId === cardId);
     
-    if (!deckCardEntry) return false;
+    if (!relationEntry) return false;
     
     // Remover a relação
-    this.deckCards.delete(deckCardEntry[0]);
+    this.deckCards.delete(relationEntry[0]);
     
-    // Atualizar contador de cards no deck
-    const updatedDeck: FlashCardDeck = {
+    // Atualizar contador de cartões no deck
+    this.flashCardDecks.set(deckId, {
       ...deck,
       cardCount: Math.max(0, deck.cardCount - 1),
       updatedAt: new Date()
-    };
-    
-    this.flashCardDecks.set(deckId, updatedDeck);
+    });
     
     return true;
   }
   
-  async getFlashCardsFromDeck(deckId: number): Promise<FlashCard[]> {
-    const deck = await this.getFlashCardDeckById(deckId);
-    if (!deck) throw new Error(`Deck with id ${deckId} not found`);
-    
-    // Encontrar todas as relações deste deck
-    const deckCards = Array.from(this.deckCards.values())
-      .filter(dc => dc.deckId === deckId)
-      .sort((a, b) => a.order - b.order);
-    
-    // Recuperar os cards na ordem correta
-    const cards: FlashCard[] = [];
-    for (const dc of deckCards) {
-      const card = await this.getFlashCardById(dc.cardId);
-      if (card) cards.push(card);
-    }
-    
-    return cards;
-  }
-  
-  async reorderFlashCardInDeck(deckId: number, cardId: number, newOrder: number): Promise<boolean> {
-    // Encontrar a relação a ser atualizada
-    const deckCardEntry = Array.from(this.deckCards.entries())
-      .find(([_, dc]) => dc.deckId === deckId && dc.cardId === cardId);
-    
-    if (!deckCardEntry) return false;
-    
-    const [id, deckCard] = deckCardEntry;
-    
-    // Atualizar a ordem
-    const updatedDeckCard: DeckCard = {
-      ...deckCard,
-      order: newOrder
-    };
-    
-    this.deckCards.set(id, updatedDeckCard);
-    
-    return true;
-  }
-
-  // ===========================================
-  // Exams Implementation
-  // ===========================================
-  
+  // Exams
   async getAllExams(): Promise<Exam[]> {
     return Array.from(this.exams.values());
   }
@@ -1323,15 +1238,14 @@ export class MemStorage implements IStorage {
   }
   
   async createExam(exam: InsertExam): Promise<Exam> {
-    const id = this.currentExamIds++;
-    const createdAt = new Date();
-    const updatedAt = new Date();
+    const id = this.currentExamId++;
+    const now = new Date();
     
     const newExam: Exam = {
       ...exam,
       id,
-      createdAt,
-      updatedAt,
+      createdAt: now,
+      updatedAt: now,
       questionCount: 0
     };
     
@@ -1353,65 +1267,44 @@ export class MemStorage implements IStorage {
     return updatedExam;
   }
   
-  async deleteExam(id: number): Promise<boolean> {
-    const exists = this.exams.has(id);
-    if (!exists) return false;
-    
-    this.exams.delete(id);
-    
-    // Remover todas as questões do exame
-    for (const [examQuestionId, examQuestion] of this.examQuestions.entries()) {
-      if (examQuestion.examId === id) {
-        this.examQuestions.delete(examQuestionId);
-      }
-    }
-    
-    // Remover todas as tentativas relacionadas
-    for (const [attemptId, attempt] of this.examAttempts.entries()) {
-      if (attempt.examId === id) {
-        this.examAttempts.delete(attemptId);
-      }
-    }
-    
-    return true;
-  }
-  
-  async getExamsBySubject(subject: string): Promise<Exam[]> {
-    return Array.from(this.exams.values())
-      .filter(exam => exam.subjects.includes(subject));
-  }
-  
-  async getPublicExams(): Promise<Exam[]> {
-    return Array.from(this.exams.values())
-      .filter(exam => exam.isPublic);
-  }
-  
   // Exam Questions
-  async addQuestionToExam(examQuestion: InsertExamQuestion): Promise<ExamQuestion> {
-    const exam = await this.getExamById(examQuestion.examId);
-    if (!exam) throw new Error(`Exam with id ${examQuestion.examId} not found`);
+  async addQuestionToExam(examId: number, questionId: number, order?: number, points?: number): Promise<ExamQuestion> {
+    const exam = await this.getExamById(examId);
+    if (!exam) throw new Error(`Exam with id ${examId} not found`);
     
-    const question = await this.getQuestionById(examQuestion.questionId);
-    if (!question) throw new Error(`Question with id ${examQuestion.questionId} not found`);
+    const question = await this.getQuestionById(questionId);
+    if (!question) throw new Error(`Question with id ${questionId} not found`);
     
-    const id = this.currentExamQuestionIds++;
-    const newExamQuestion: ExamQuestion = {
-      ...examQuestion,
-      id
+    // Verificar se a relação já existe
+    const existingRelation = Array.from(this.examQuestions.values())
+      .find(eq => eq.examId === examId && eq.questionId === questionId);
+    
+    if (existingRelation) return existingRelation;
+    
+    // Criar a relação
+    const id = this.currentExamQuestionId++;
+    
+    // Se a ordem não foi especificada, usar a próxima disponível
+    const actualOrder = order !== undefined ? order : exam.questionCount;
+    
+    const newRelation: ExamQuestion = {
+      id,
+      examId,
+      questionId,
+      order: actualOrder,
+      points: points !== undefined ? points : 1
     };
     
-    this.examQuestions.set(id, newExamQuestion);
+    this.examQuestions.set(id, newRelation);
     
     // Atualizar contador de questões do exame
-    const updatedExam: Exam = {
+    this.exams.set(examId, {
       ...exam,
       questionCount: exam.questionCount + 1,
       updatedAt: new Date()
-    };
+    });
     
-    this.exams.set(exam.id, updatedExam);
-    
-    return newExamQuestion;
+    return newRelation;
   }
   
   async removeQuestionFromExam(examId: number, questionId: number): Promise<boolean> {

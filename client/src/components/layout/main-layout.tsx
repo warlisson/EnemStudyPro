@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import Sidebar from "./sidebar";
 import MobileSidebar from "./mobile-sidebar";
+import Header from "./header";
 
 type MainLayoutProps = {
   children: ReactNode;
@@ -11,10 +12,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
     <div className="min-h-screen flex bg-neutral-50">
       <Sidebar />
       
-      <div className="flex-1 md:ml-64">
+      <div className="flex-1 md:ml-64 flex flex-col">
+        <Header />
         <MobileSidebar />
         
-        <main>
+        <main className="flex-1">
           {children}
         </main>
         
