@@ -22,6 +22,19 @@ import Arquivos from "@/pages/arquivos";
 import PlanoEstudos from "@/pages/plano-estudos";
 import NotFound from "@/pages/not-found";
 
+// Novas páginas para Flash Cards, Exames e Fóruns
+import FlashCards from "@/pages/flashcards";
+import FlashCardDetail from "@/pages/flashcard-detail";
+import FlashCardDecks from "@/pages/flashcard-decks";
+import FlashCardDeckDetail from "@/pages/flashcard-deck-detail";
+import NewFlashCard from "@/pages/flashcards/new";
+import Exams from "@/pages/exams";
+import ExamDetail from "@/pages/exam-detail";
+import ExamAttempt from "@/pages/exam-attempt";
+import Forums from "@/pages/forums";
+import ForumDetail from "@/pages/forum-detail";
+import ThreadDetail from "@/pages/thread-detail";
+
 function Router() {
   return (
     <MainLayout>
@@ -45,6 +58,23 @@ function Router() {
         <Route path="/arquivos/:folderId" component={Arquivos} />
         <Route path="/plano-estudos" component={PlanoEstudos} />
         <Route path="/plano-estudos/:planId" component={PlanoEstudos} />
+        
+        {/* Rotas para Flash Cards */}
+        <Route path="/flashcards" component={FlashCards} />
+        <Route path="/flashcards/new" component={NewFlashCard} />
+        <Route path="/flashcards/:id" component={FlashCardDetail} />
+        <Route path="/flashcard-decks" component={FlashCardDecks} />
+        <Route path="/flashcard-deck/:id" component={FlashCardDeckDetail} />
+        
+        {/* Rotas para Exames (Simulados) */}
+        <Route path="/exams" component={Exams} />
+        <Route path="/exam/:id" component={ExamDetail} />
+        <Route path="/exam/:id/attempt/:attemptId" component={ExamAttempt} />
+        
+        {/* Rotas para Fóruns */}
+        <Route path="/forums" component={Forums} />
+        <Route path="/forum/:id" component={ForumDetail} />
+        <Route path="/thread/:id" component={ThreadDetail} />
         
         {/* Fallback to 404 */}
         <Route component={NotFound} />

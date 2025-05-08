@@ -11,7 +11,10 @@ import {
   Video,
   FileText,
   FolderOpen,
-  Calendar
+  Calendar,
+  BrainCircuit,
+  ClipboardList,
+  MessageSquare
 } from "lucide-react";
 
 const subjectColors: Record<string, { dot: string, hover: string, text: string }> = {
@@ -38,6 +41,9 @@ const mainNavItems = [
   { label: "Vídeo-aulas", href: "/videos", icon: Video },
   { label: "Artigos", href: "/artigos", icon: FileText },
   { label: "Trilhas de Aprendizado", href: "/trilhas", icon: MapPin },
+  { label: "Flash Cards", href: "/flashcards", icon: BrainCircuit },
+  { label: "Simulados", href: "/exams", icon: ClipboardList },
+  { label: "Fórum", href: "/forums", icon: MessageSquare },
   { label: "Arquivos", href: "/arquivos", icon: FolderOpen },
   { label: "Plano de Estudos", href: "/plano-estudos", icon: Calendar },
 ];

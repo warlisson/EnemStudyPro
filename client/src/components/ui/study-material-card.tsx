@@ -41,11 +41,9 @@ export function StudyMaterialCard({
         </div>
         <h3 className="text-lg font-semibold text-neutral-800 mb-2">{title}</h3>
         <p className="text-neutral-600 text-sm mb-4 line-clamp-3">{description}</p>
-        <Link href={href}>
-          <a className="text-primary hover:text-primary-700 text-sm font-medium flex items-center">
-            Continuar lendo
-            <ChevronRight className="ml-1 h-4 w-4" />
-          </a>
+        <Link href={href} className="text-primary hover:text-primary-700 text-sm font-medium flex items-center">
+          Continuar lendo
+          <ChevronRight className="ml-1 h-4 w-4" />
         </Link>
       </div>
     </Card>
