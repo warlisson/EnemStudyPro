@@ -214,21 +214,21 @@ export default function CentralAluno() {
   }
   
   // Renderizar mensagem de erro
-  if (ticketsError || faqsError) {
-    return (
-      <div className="container max-w-7xl mx-auto py-6">
-        <div className="flex items-center mb-8">
-          <PageTitle 
-            title="Central do Aluno" 
-            icon={<HeadphonesIcon className="h-6 w-6" />}
-          />
-        </div>
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          Ocorreu um erro ao carregar as informações. Tente novamente mais tarde.
-        </div>
-      </div>
-    );
-  }
+  // if (ticketsError || faqsError) {
+  //   return (
+  //     <div className="container max-w-7xl mx-auto py-6">
+  //       <div className="flex items-center mb-8">
+  //         <PageTitle 
+  //           title="Central do Aluno" 
+  //           icon={<HeadphonesIcon className="h-6 w-6" />}
+  //         />
+  //       </div>
+  //       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+  //         Ocorreu um erro ao carregar as informações. Tente novamente mais tarde.
+  //       </div>
+  //     </div>
+  //   );
+  // }
   
   return (
     <div className="container max-w-7xl mx-auto py-6">

@@ -259,20 +259,20 @@ export default function FlashCards() {
   });
   
   // Renderizar mensagem de erro
-  if (cardsError || decksError || dueCardsError) {
-    return (
-      <div className="container max-w-7xl mx-auto py-6">
-        <PageTitle 
-          title="Flash Cards" 
-          description="Erro ao carregar flash cards"
-          icon={<BrainCircuit className="h-6 w-6" />}
-        />
-        <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          Ocorreu um erro ao carregar os flash cards. Por favor, tente novamente mais tarde.
-        </div>
-      </div>
-    );
-  }
+  // if (cardsError || decksError || dueCardsError) {
+  //   return (
+  //     <div className="container max-w-7xl mx-auto py-6">
+  //       <PageTitle 
+  //         title="Flash Cards" 
+  //         description="Erro ao carregar flash cards"
+  //         icon={<BrainCircuit className="h-6 w-6" />}
+  //       />
+  //       <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+  //         Ocorreu um erro ao carregar os flash cards. Por favor, tente novamente mais tarde.
+  //       </div>
+  //     </div>
+  //   );
+  // }
   
   return (
     <div className="container max-w-7xl mx-auto py-6">

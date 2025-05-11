@@ -370,20 +370,20 @@ export default function Exams() {
     .filter(item => item.exam); // Filtrar tentativas sem exame correspondente
   
   // Renderizar mensagem de erro
-  if (examsError || attemptsError || inProgressError) {
-    return (
-      <div className="container max-w-7xl mx-auto py-6">
-        <PageTitle 
-          title="Simulados" 
-          description="Erro ao carregar simulados"
-          icon={<ClipboardList className="h-6 w-6" />}
-        />
-        <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          Ocorreu um erro ao carregar os simulados. Por favor, tente novamente mais tarde.
-        </div>
-      </div>
-    );
-  }
+  // if (examsError || attemptsError || inProgressError) {
+  //   return (
+  //     <div className="container max-w-7xl mx-auto py-6">
+  //       <PageTitle 
+  //         title="Simulados" 
+  //         description="Erro ao carregar simulados"
+  //         icon={<ClipboardList className="h-6 w-6" />}
+  //       />
+  //       <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+  //         Ocorreu um erro ao carregar os simulados. Por favor, tente novamente mais tarde.
+  //       </div>
+  //     </div>
+  //   );
+  // }
   
   return (
     <div className="container max-w-7xl mx-auto py-6">

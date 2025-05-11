@@ -730,13 +730,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Get all exams
   app.get('/api/exams', async (req, res) => {
-    try {
-      const exams = await storage.getAllExams();
-      res.json(exams);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching exams" });
-    }
-  });
+  try {
+    const exams = await storage.getAllExams();  // Chama o método para pegar todos os exames
+    res.json(exams);  // Retorna os exames encontrados como JSON
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching exams", error: error.message });
+  }
+});
   
   // Get public exams
   app.get('/api/exams/public', async (req, res) => {
@@ -993,10 +993,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all forums
   app.get('/api/forums', async (req, res) => {
     try {
-      const forums = await storage.getAllForums();
-      res.json(forums);
+      console.log("Tentando carregar os fóruns...");
+      const forums = await storage.getAllForums();  // Certifique-se de que `storage` seja a instância correta de MemStorage
+      console.log("Fóruns carregados com sucesso:", forums);
+      res.status(200).json(forums);  // Retorna os dados dos fóruns
     } catch (error) {
-      res.status(500).json({ message: "Error fetching forums" });
+      console.error("Erro ao carregar os fóruns:", error);
+      res.status(500).json({ message: "Erro ao carregar os fóruns. Tente novamente mais tarde." });
     }
   });
   

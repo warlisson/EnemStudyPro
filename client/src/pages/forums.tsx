@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  ArrowUpDown, 
-  MessageSquare, 
+import {
+  Plus,
+  Search,
+  Filter,
+  ArrowUpDown,
+  MessageSquare,
   Users,
   Clock,
   BookOpen,
   PinIcon,
-  LockIcon
+  LockIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,7 +86,7 @@ const ForumItem = ({ forum }: { forum: Forum }) => {
             </CardDescription>
           )}
         </CardHeader>
-        
+
         <CardContent className="pb-0">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground flex items-center">
@@ -99,17 +99,16 @@ const ForumItem = ({ forum }: { forum: Forum }) => {
             </span>
           </div>
         </CardContent>
-        
+
         <CardFooter className="pt-4 border-t mt-4">
           <div className="flex justify-between items-center w-full">
-            <Badge variant="outline">
-              {forum.subject || "Geral"}
-            </Badge>
-            
+            <Badge variant="outline">{forum.subject || "Geral"}</Badge>
+
             {forum.lastActivityAt && (
               <span className="text-xs text-muted-foreground flex items-center">
                 <Clock className="h-3 w-3 mr-1" />
-                Última atividade: {new Date(forum.lastActivityAt).toLocaleDateString('pt-BR')}
+                Última atividade:{" "}
+                {new Date(forum.lastActivityAt).toLocaleDateString("pt-BR")}
               </span>
             )}
           </div>
@@ -130,10 +129,10 @@ const ThreadItem = ({ thread }: { thread: ForumThread }) => {
               {thread.isPinned && (
                 <PinIcon className="h-4 w-4 text-amber-500" />
               )}
-              {thread.isLocked && (
-                <LockIcon className="h-4 w-4 text-red-500" />
-              )}
-              <CardTitle className="line-clamp-1 text-base">{thread.title}</CardTitle>
+              {thread.isLocked && <LockIcon className="h-4 w-4 text-red-500" />}
+              <CardTitle className="line-clamp-1 text-base">
+                {thread.title}
+              </CardTitle>
             </div>
             {thread.tags && thread.tags.length > 0 && (
               <Badge variant="outline" className="ml-2">
@@ -143,12 +142,12 @@ const ThreadItem = ({ thread }: { thread: ForumThread }) => {
             )}
           </div>
           <CardDescription className="line-clamp-2 mt-1">
-            {thread.content.length > 150 
-              ? thread.content.substring(0, 150) + '...' 
+            {thread.content.length > 150
+              ? thread.content.substring(0, 150) + "..."
               : thread.content}
           </CardDescription>
         </CardHeader>
-        
+
         <CardFooter className="pt-2 border-t flex justify-between items-center">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">
@@ -165,9 +164,11 @@ const ThreadItem = ({ thread }: { thread: ForumThread }) => {
             </span>
             <span className="text-xs text-muted-foreground flex items-center">
               <Clock className="h-3 w-3 mr-1" />
-              {thread.lastReplyAt 
-                ? new Date(thread.lastReplyAt).toLocaleDateString('pt-BR')
-                : new Date(thread.createdAt || Date.now()).toLocaleDateString('pt-BR')}
+              {thread.lastReplyAt
+                ? new Date(thread.lastReplyAt).toLocaleDateString("pt-BR")
+                : new Date(thread.createdAt || Date.now()).toLocaleDateString(
+                    "pt-BR",
+                  )}
             </span>
           </div>
         </CardFooter>
@@ -180,49 +181,58 @@ export default function Forums() {
   const [searchTerm, setSearchTerm] = useState("");
   const [subjectFilter, setSubjectFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("recent");
-  
+
   // Buscar todos os fóruns
-  const { 
+  const {
     data: forums = [],
     isLoading: isLoadingForums,
-    error: forumsError 
+    error: forumsError,
   } = useQuery({
-    queryKey: ['/api/forums'],
-    enabled: true
+    queryKey: ["/api/forums"],
+    enabled: true,
   });
 
   // Buscar tópicos recentes
-  const { 
+  const {
     data: recentThreads = [],
     isLoading: isLoadingThreads,
-    error: threadsError 
+    error: threadsError,
   } = useQuery({
-    queryKey: ['/api/forums/threads/recent'],
-    enabled: true
+    queryKey: ["/api/forums/threads/recent"],
+    enabled: true,
   });
-  
+
   // Filtrar e ordenar fóruns
-  const filteredForums = Array.isArray(forums) ? forums.filter((forum: Forum) => {
-    if (!forum || typeof forum !== 'object') return false;
-    
-    const matchesSearch = searchTerm === "" || 
-      (forum.title && forum.title.toLowerCase().includes(searchTerm.toLowerCase())) || 
-      (forum.description && forum.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesSubject = subjectFilter === "all" || forum.subject === subjectFilter;
-    
-    return matchesSearch && matchesSubject;
-  }) : [];
-  
+  const filteredForums = Array.isArray(forums)
+    ? forums.filter((forum: Forum) => {
+        if (!forum || typeof forum !== "object") return false;
+
+        const matchesSearch =
+          searchTerm === "" ||
+          (forum.title &&
+            forum.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (forum.description &&
+            forum.description.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        const matchesSubject =
+          subjectFilter === "all" || forum.subject === subjectFilter;
+
+        return matchesSearch && matchesSubject;
+      })
+    : [];
+
   // Ordenar fóruns
   const sortedForums = [...filteredForums].sort((a: Forum, b: Forum) => {
     switch (sortBy) {
       case "recent":
         // Ordenar por atividade mais recente
-        return new Date(b.lastActivityAt || 0).getTime() - new Date(a.lastActivityAt || 0).getTime();
+        return (
+          new Date(b.lastActivityAt || 0).getTime() -
+          new Date(a.lastActivityAt || 0).getTime()
+        );
       case "alphabetical":
         // Ordenar por ordem alfabética
-        return (a.title || '').localeCompare(b.title || '');
+        return (a.title || "").localeCompare(b.title || "");
       case "threads":
         // Ordenar por número de tópicos
         return (b.threadCount || 0) - (a.threadCount || 0);
@@ -233,72 +243,89 @@ export default function Forums() {
         return 0;
     }
   });
-  
+
   // Filtrar e ordenar tópicos recentes
-  const filteredThreads = Array.isArray(recentThreads) ? recentThreads.filter((thread: ForumThread) => {
-    if (!thread || typeof thread !== 'object') return false;
-    
-    const matchesSearch = searchTerm === "" || 
-      (thread.title && thread.title.toLowerCase().includes(searchTerm.toLowerCase())) || 
-      (thread.content && thread.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (thread.tags && Array.isArray(thread.tags) && thread.tags.some(tag => 
-        tag && tag.toLowerCase().includes(searchTerm.toLowerCase())
-      ));
-    
-    const matchesSubject = subjectFilter === "all" || 
-      (thread.forumId && Array.isArray(forums) && forums.find((f: Forum) => f.id === thread.forumId)?.subject === subjectFilter);
-    
-    return matchesSearch && matchesSubject;
-  }) : [];
-  
+  const filteredThreads = Array.isArray(recentThreads)
+    ? recentThreads.filter((thread: ForumThread) => {
+        if (!thread || typeof thread !== "object") return false;
+
+        const matchesSearch =
+          searchTerm === "" ||
+          (thread.title &&
+            thread.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (thread.content &&
+            thread.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (thread.tags &&
+            Array.isArray(thread.tags) &&
+            thread.tags.some(
+              (tag) =>
+                tag && tag.toLowerCase().includes(searchTerm.toLowerCase()),
+            ));
+
+        const matchesSubject =
+          subjectFilter === "all" ||
+          (thread.forumId &&
+            Array.isArray(forums) &&
+            forums.find((f: Forum) => f.id === thread.forumId)?.subject ===
+              subjectFilter);
+
+        return matchesSearch && matchesSubject;
+      })
+    : [];
+
   // Ordenar tópicos
-  const sortedThreads = [...filteredThreads].sort((a: ForumThread, b: ForumThread) => {
-    switch (sortBy) {
-      case "recent":
-        // Ordenar por criação/atividade mais recente
-        const dateA = a.lastReplyAt || a.createdAt;
-        const dateB = b.lastReplyAt || b.createdAt;
-        return new Date(dateB || 0).getTime() - new Date(dateA || 0).getTime();
-      case "alphabetical":
-        // Ordenar por ordem alfabética
-        return a.title.localeCompare(b.title);
-      case "replies":
-        // Ordenar por número de respostas
-        return (b.replyCount || 0) - (a.replyCount || 0);
-      case "views":
-        // Ordenar por número de visualizações
-        return (b.viewCount || 0) - (a.viewCount || 0);
-      default:
-        return 0;
-    }
-  });
-  
-  // Renderizar mensagem de erro
-  if (forumsError || threadsError) {
-    return (
-      <div className="container max-w-7xl mx-auto py-6">
-        <PageTitle 
-          title="Fóruns" 
-          description="Erro ao carregar fóruns"
-          icon={<MessageSquare className="h-6 w-6" />}
-        />
-        <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          Ocorreu um erro ao carregar os fóruns. Por favor, tente novamente mais tarde.
-        </div>
-      </div>
-    );
-  }
-  
+  const sortedThreads = [...filteredThreads].sort(
+    (a: ForumThread, b: ForumThread) => {
+      switch (sortBy) {
+        case "recent":
+          // Ordenar por criação/atividade mais recente
+          const dateA = a.lastReplyAt || a.createdAt;
+          const dateB = b.lastReplyAt || b.createdAt;
+          return (
+            new Date(dateB || 0).getTime() - new Date(dateA || 0).getTime()
+          );
+        case "alphabetical":
+          // Ordenar por ordem alfabética
+          return a.title.localeCompare(b.title);
+        case "replies":
+          // Ordenar por número de respostas
+          return (b.replyCount || 0) - (a.replyCount || 0);
+        case "views":
+          // Ordenar por número de visualizações
+          return (b.viewCount || 0) - (a.viewCount || 0);
+        default:
+          return 0;
+      }
+    },
+  );
+
+  // // Renderizar mensagem de erro
+  // if (forumsError || threadsError) {
+  //   return (
+  //     <div className="container max-w-7xl mx-auto py-6">
+  //       <PageTitle
+  //         title="Fóruns"
+  //         description="Erro ao carregar fóruns"
+  //         icon={<MessageSquare className="h-6 w-6" />}
+  //       />
+  //       <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+  //         Ocorreu um erro ao carregar os fóruns. Por favor, tente novamente mais
+  //         tarde.
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
   return (
     <div className="container max-w-7xl mx-auto py-6">
       <div className="flex flex-col space-y-6">
         <div className="flex flex-col md:flex-row justify-between md:items-center space-y-4 md:space-y-0">
-          <PageTitle 
-            title="Fóruns" 
+          <PageTitle
+            title="Fóruns"
             description="Participe de discussões e tire suas dúvidas"
             icon={<MessageSquare className="h-6 w-6" />}
           />
-          
+
           <div className="flex items-center space-x-2">
             <Link href="/forums/new-thread">
               <Button>
@@ -308,7 +335,7 @@ export default function Forums() {
             </Link>
           </div>
         </div>
-        
+
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -319,12 +346,9 @@ export default function Forums() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-2">
-            <Select 
-              value={subjectFilter} 
-              onValueChange={setSubjectFilter}
-            >
+            <Select value={subjectFilter} onValueChange={setSubjectFilter}>
               <SelectTrigger className="w-full sm:w-[200px]">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Disciplina" />
@@ -345,7 +369,7 @@ export default function Forums() {
                 <SelectItem value="redacao">Redação</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="w-full sm:w-auto">
@@ -354,27 +378,40 @@ export default function Forums() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>
-                  <DropdownMenuRadioItem value="recent">Mais recentes</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="alphabetical">Alfabética (A-Z)</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="threads">Mais tópicos</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="posts">Mais posts</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="replies">Mais respostas</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="views">Mais visualizações</DropdownMenuRadioItem>
+                <DropdownMenuRadioGroup
+                  value={sortBy}
+                  onValueChange={setSortBy}
+                >
+                  <DropdownMenuRadioItem value="recent">
+                    Mais recentes
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="alphabetical">
+                    Alfabética (A-Z)
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="threads">
+                    Mais tópicos
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="posts">
+                    Mais posts
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="replies">
+                    Mais respostas
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="views">
+                    Mais visualizações
+                  </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
-        
+
         <Tabs defaultValue="forums" className="w-full">
           <TabsList className="mb-4">
-            <TabsTrigger value="forums">
-              Fóruns
-            </TabsTrigger>
+            <TabsTrigger value="forums">Fóruns</TabsTrigger>
             <TabsTrigger value="recent">Tópicos Recentes</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="forums" className="w-full">
             {isLoadingForums ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
@@ -386,9 +423,11 @@ export default function Forums() {
               <EmptyState
                 icon={<MessageSquare className="h-10 w-10" />}
                 title="Nenhum fórum encontrado"
-                description={searchTerm || subjectFilter !== "all" 
-                  ? "Tente alterar os filtros de busca." 
-                  : "Não há fóruns disponíveis no momento."}
+                description={
+                  searchTerm || subjectFilter !== "all"
+                    ? "Tente alterar os filtros de busca."
+                    : "Não há fóruns disponíveis no momento."
+                }
               />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -398,7 +437,7 @@ export default function Forums() {
               </div>
             )}
           </TabsContent>
-          
+
           <TabsContent value="recent" className="w-full">
             {isLoadingThreads ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-pulse">
@@ -410,9 +449,11 @@ export default function Forums() {
               <EmptyState
                 icon={<MessageSquare className="h-10 w-10" />}
                 title="Nenhum tópico encontrado"
-                description={searchTerm || subjectFilter !== "all" 
-                  ? "Tente alterar os filtros de busca ou criar um novo tópico." 
-                  : "Seja o primeiro a criar um tópico de discussão."}
+                description={
+                  searchTerm || subjectFilter !== "all"
+                    ? "Tente alterar os filtros de busca ou criar um novo tópico."
+                    : "Seja o primeiro a criar um tópico de discussão."
+                }
                 action={
                   <Link href="/forums/new-thread">
                     <Button>
